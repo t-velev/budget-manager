@@ -1,0 +1,12 @@
+services:
+  notion_extract:
+    build: .
+    container_name: notion_extract
+    networks:
+      - bm_network
+    volumes:
+      - ./data:/app/data
+    
+networks:
+  bm_network:
+    driver: bridge
