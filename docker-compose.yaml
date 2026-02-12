@@ -6,7 +6,17 @@ services:
       - bm_network
     volumes:
       - ./data:/app/data
+    environment:
+      - NOTION_API_KEY=${NOTION_API_KEY}   
+      - NOTION_YEARS_DB_ID=${NOTION_YEARS_DB_ID}
+      - NOTION_MONTHS_DB_ID=${NOTION_MONTHS_DB_ID}
+      - NOTION_CATEGORIES_DB_ID=${NOTION_CATEGORIES_DB_ID}
+      - NOTION_SUBCATEGORIES_DB_ID=${NOTION_SUBCATEGORIES_DB_ID}
+      - NOTION_BUDGETS_DB_ID=${NOTION_BUDGETS_DB_ID}
+      - NOTION_ACCOUNTS_DB_ID=${NOTION_ACCOUNTS_DB_ID}
+      - NOTION_INC_EXP_DB_ID=${NOTION_INC_EXP_DB_ID}
     
 networks:
   bm_network:
     driver: bridge
+    
