@@ -3,7 +3,7 @@ import json
 import os
 import time
 
-database_id = os.getenv('NOTION_YEARS_DB_ID')
+database_id = os.getenv('NOTION_INC_EXP_DB_ID')
 api_key = os.getenv('NOTION_API_KEY')
 
 headers = {
@@ -12,9 +12,9 @@ headers = {
     'Notion-Version' : '2022-06-28'
 }
 
-def get_years():
+def get_inc_exp():
     """
-    Extract data from Notion "Years" database and write it to a JSON file.
+    Extracts data from Notion "Income and Expenses" database and writes it to a JSON file.
     The function will be modified after a Postgres database is created.
     """
     
@@ -45,29 +45,29 @@ def get_years():
         time.sleep(0.4)       
 
     # Write the result as file
-    with open('./data/notion_years_extract.json', 'w', encoding='utf-8') as file:
+    with open('./data/notion_inc_exp_extract.json', 'w', encoding='utf-8') as file:
         json.dump(all_data, file, ensure_ascii=False, indent=4)
 
-# years = get_years()
-# print(f'Retrieved {len(years)} rows.') 
+# inc_exp = get_inc_exp()
+# print(f'Retrieved {len(inc_exp)} rows.') 
 
 def read_file():
     """
-    Read the extracted "Years" data from the JSON file and find the needed elements
+    Reads the extracted "Income and Expenses" data from the JSON file and finds the needed elements
     that will be loaded in the Postgres database.
     The function will be modified after the Postgres database is created.
     """
 
-    with open('./data/notion_years_extract.json', 'r', encoding = 'utf-8') as file:
+    with open('data/notion_inc_exp_extract.json', 'r', encoding = 'utf-8') as file:
         data = json.load(file)
 
     cols = {}
 
-    for i, item in enumerate(data['results']):
+    for i, item in enumerate(data):
 
         cols[i] = {
             'Id': item['id'],
-            'Title': item['properties']['Име']['title'][0]['plain_text'],
+            'Title': item['properties']['Name']['title'][0]['plain_text'],
             'Created_time': item['created_time'],
             'Last_edited_time': item['last_edited_time'],
         }
