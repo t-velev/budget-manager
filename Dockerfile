@@ -9,7 +9,7 @@ RUN pip install --no-cache-dir \
     requests
 
 # Copy scripts to working dir
-COPY /src/notion_extract.py .
+COPY . .
 
 # Execute
-CMD ["python", "notion_extract.py"]
+# CMD []
