@@ -5,15 +5,23 @@ x-py-scripts-template: &python-base
     volumes:
       - ./src:/app/src
       - ./data:/app/data
+      
     environment:
-      - NOTION_API_KEY=${NOTION_API_KEY}   
-      - NOTION_YEARS_DB_ID=${NOTION_YEARS_DB_ID}
-      - NOTION_MONTHS_DB_ID=${NOTION_MONTHS_DB_ID}
-      - NOTION_CATEGORIES_DB_ID=${NOTION_CATEGORIES_DB_ID}
-      - NOTION_SUBCATEGORIES_DB_ID=${NOTION_SUBCATEGORIES_DB_ID}
-      - NOTION_BUDGETS_DB_ID=${NOTION_BUDGETS_DB_ID}
-      - NOTION_ACCOUNTS_DB_ID=${NOTION_ACCOUNTS_DB_ID}
-      - NOTION_INC_EXP_DB_ID=${NOTION_INC_EXP_DB_ID}
+      # --- NOTION CONFIG ---
+      NOTION_API_KEY:             ${NOTION_API_KEY}
+      NOTION_DB_ID_YEARS:         ${NOTION_DB_ID_YEARS}
+      NOTION_DB_ID_MONTHS:        ${NOTION_DB_ID_MONTHS}
+      NOTION_DB_ID_CATEGORIES:    ${NOTION_DB_ID_CATEGORIES}
+      NOTION_DB_ID_SUBCATEGORIES: ${NOTION_DB_ID_SUBCATEGORIES}
+      NOTION_DB_ID_BUDGETS:       ${NOTION_DB_ID_BUDGETS}
+      NOTION_DB_ID_ACCOUNTS:      ${NOTION_DB_ID_ACCOUNTS}
+      NOTION_DB_ID_INC_EXP:       ${NOTION_DB_ID_INC_EXP}
+
+      # --- DATABASE CONFIG ---
+      POSTGRES_USER:              ${POSTGRES_USER}
+      POSTGRES_PASSWORD:          ${POSTGRES_PASSWORD}
+      POSTGRES_DB:                ${POSTGRES_DB}
+
     depends_on:
       database:
         condition: service_healthy 
@@ -26,9 +34,9 @@ services:
     networks:
       - bm_network
     environment:
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_DB=${POSTGRES_DB}
+      POSTGRES_USER:              ${POSTGRES_USER}
+      POSTGRES_PASSWORD:          ${POSTGRES_PASSWORD}
+      POSTGRES_DB:                ${POSTGRES_DB}
     ports:
       - "5433:5432"
     volumes:
