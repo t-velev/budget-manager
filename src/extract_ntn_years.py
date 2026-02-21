@@ -1,10 +1,24 @@
+###################################
+## 1. Import libraries
+###################################
+
 import requests
 import json
 import os
 import time
+import pandas as pd
+from sqlalchemy import create_engine
 
-database_id = os.getenv('NOTION_YEARS_DB_ID')
+
+###################################
+## 2. Set initial vars
+###################################
+
+years_db_id = os.getenv('NOTION_DB_ID_YEARS')
 api_key = os.getenv('NOTION_API_KEY')
+postgres_db = os.getenv('POSTGRES_DB')
+db_user = os.getenv('POSTGRES_USER')
+db_pass = os.getenv('POSTGRES_PASSWORD')
 
 headers = {
     'Authorization' : 'Bearer ' + api_key,
@@ -12,25 +26,41 @@ headers = {
     'Notion-Version' : '2022-06-28'
 }
 
+
+###################################
+## 3. Create extract function
+###################################
+
 def get_years():
     """
-    Extract data from Notion "Years" database and write it to a JSON file.
-    The function will be modified after a Postgres database is created.
+    Extract data from the "Years" database in Notion.
+
+    Since Notion API has request size limit of 100 rows,
+    the function uses pagination variables to make multiple
+    API calls untill all the data is extracted.
+
+    Returns:
+        list[dict]: A list with all rows in dictionary form.
     """
     
-    url = f'https://api.notion.com/v1/databases/{database_id}/query'
+    url = f'https://api.notion.com/v1/databases/{years_db_id}/query'
     
-    # Pagination variables to extract all rows (API size limit = 100)
+    # Pagination variables to extract all rows 
     all_data = []
     has_more = True
     next_cursor = None
 
     # Loop through all pages
-    while has_more:
-        payload  = {'page_size' : 100}
+    while has_more == True:
 
+        payload = {'page_size' : 100}                                                     # Notion API request size limit = 100
+
+        # payload['filter'] = {'timestamp': 'last_edited_time',                           # Comment for initial load; Uncomment for incremental load
+        #                     'last_edited_time': {'after': '2026-01-01T00:00:00.000Z'}       
+        #                     }
+        
         if next_cursor:
-                payload['start_cursor'] = next_cursor
+            payload['start_cursor'] = next_cursor
 
         response = requests.post(url, json=payload, headers=headers)
 
@@ -42,38 +72,45 @@ def get_years():
         has_more = data['has_more']
         next_cursor = data['next_cursor']
         
+        # Pause to not overload the API
         time.sleep(0.4)       
 
     # Write the result as file
-    with open('./data/notion_years_extract.json', 'w', encoding='utf-8') as file:
-        json.dump(all_data, file, ensure_ascii=False, indent=4)
+    # with open('./data/notion_years_extract.json', 'w', encoding='utf-8') as file:
+    #     json.dump(all_data, file, ensure_ascii=False, indent=4)
 
-# years = get_years()
-# print(f'Retrieved {len(years)} rows.') 
+    return all_data
 
-def read_file():
-    """
-    Read the extracted "Years" data from the JSON file and find the needed elements
-    that will be loaded in the Postgres database.
-    The function will be modified after the Postgres database is created.
-    """
 
-    with open('./data/notion_years_extract.json', 'r', encoding = 'utf-8') as file:
-        data = json.load(file)
+###################################
+## 4. Call function and load to db
+###################################
 
-    cols = {}
+# Call extract function
+years = get_years()
 
-    for i, item in enumerate(data['results']):
+print(f'Retrieved {len(years)} rows.') 
 
-        cols[i] = {
-            'Id': item['id'],
-            'Title': item['properties']['Име']['title'][0]['plain_text'],
-            'Created_time': item['created_time'],
-            'Last_edited_time': item['last_edited_time'],
-        }
+# Set up connection to the database
+engine = create_engine(f'postgresql://{db_user}:{db_pass}@database:5432/{postgres_db}')
 
-    return cols
-    
-cols = read_file()
+# Extract and name only the needed columns
+db_years_data = []
 
-print(cols)
+for i, item in enumerate(years):
+    db_years_data.append(
+         {'id': item['id'],
+          'title': item['properties']['Име']['title'][0]['plain_text'],
+          'created_time': item['created_time'],
+          'last_edited_time': item['last_edited_time']}
+        )
+
+# Create pandas dataframe
+df = pd.DataFrame(db_years_data)
+
+# Load extracted data to the postgres database
+df.to_sql(name='years_src', schema='01_src', con=engine, if_exists='delete_rows', index=False)
+
+print(df)
+
+print("Data loaded successfully!")

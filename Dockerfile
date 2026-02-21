@@ -6,7 +6,10 @@ WORKDIR /app
 
 # Install needed libraries
 RUN pip install --no-cache-dir \
-    requests
+    requests \
+    pandas \
+    sqlalchemy \
+    psycopg2-binary
 
 # Copy scripts to working dir
 COPY . .
