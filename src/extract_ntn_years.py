@@ -58,6 +58,10 @@ def get_years():
         # payload['filter'] = {'timestamp': 'last_edited_time',                           # Comment for initial load; Uncomment for incremental load
         #                     'last_edited_time': {'after': '2026-01-01T00:00:00.000Z'}       
         #                     }
+
+        payload['sorts'] = [{'timestamp': 'created_time',
+                            'direction': 'ascending'
+                            }]      
         
         if next_cursor:
             payload['start_cursor'] = next_cursor
