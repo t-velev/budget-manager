@@ -1,3 +1,4 @@
 .env
 budget_manager.code-workspace
 data/
+__pycache__
