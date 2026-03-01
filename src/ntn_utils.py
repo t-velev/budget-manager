@@ -31,9 +31,9 @@ def get_data(db_id: str) -> list[dict]:
     next_cursor = None
 
     # Loop through all pages
-    while has_more == True:
+    while has_more == True and len(all_data) < 50:  # Capped at 50 during development
 
-        payload = {'page_size' : 100}                                                     # Notion API request size limit = 100
+        payload = {'page_size' : 50}                                                     # Notion API request size limit = 100
 
         # payload['filter'] = {'timestamp': 'last_edited_time',                           # Comment for initial load; Uncomment for incremental load
         #                     'last_edited_time': {'after': '2026-01-01T00:00:00.000Z'}       
@@ -55,7 +55,7 @@ def get_data(db_id: str) -> list[dict]:
         # Update pagination variables
         has_more = data['has_more']
         next_cursor = data['next_cursor']
-        
+
         # Pause to not overload the API
         time.sleep(0.4)       
 
