@@ -39,17 +39,19 @@ for i, item in enumerate(inc_exp):
     db_inc_exp_data.append(
          {
           'id':                item['id']                                                                                                                                   ,
-          'created_time':      item['created_time']                                                                                                                         ,
-          'last_edited_time':  item['last_edited_time']                                                                                                                     ,
-          'amount':            item['properties']['Сума']['number']                                                                                                         ,
-          'type':              item['properties']['Тип']['select']['name']                                                                                                  ,
           'title':             item['properties']['Name']['title'][0]['plain_text']                        if item['properties']['Name']['title']                 else None ,
-          'subcategory_id':    item['properties']['Подкатегория']['relation'][0]['id']                     if item['properties']['Подкатегория']['relation']      else None ,
-          'category_id':       item['properties']['Категория']['rollup']['array'][0]['relation'][0]['id']  if item['properties']['Категория']['rollup']['array']  else None ,
-          'account_id':        item['properties']['Сметка']['rollup']['array'][0]['relation'][0]['id']     if item['properties']['Сметка']['rollup']['array']     else None ,
+          'type':              item['properties']['Тип']['select']['name']                                                                                                  ,
           'date':              item['properties']['Дата']['date']['start']                                 if item['properties']['Дата']['date']                  else None ,
+          'amount':            item['properties']['Сума']['number']                                                                                                         ,
           'status':            item['properties']['Статус']['select']['name']                              if item['properties']['Статус']                        else None ,
-          'note':              item['properties']['Бележка']['rich_text'][0]['plain_text']                 if item['properties']['Бележка']['rich_text']          else None 
+          'note':              item['properties']['Бележка']['rich_text'][0]['plain_text']                 if item['properties']['Бележка']['rich_text']          else None ,
+          'year_id':           item['properties']['Година']['relation'][0]['id']                           if item['properties']['Година']['relation']            else None ,
+          'month_id':          item['properties']['Месец']['relation'][0]['id']                            if item['properties']['Месец']['relation']             else None ,
+          'category_id':       item['properties']['Категория']['rollup']['array'][0]['relation'][0]['id']  if item['properties']['Категория']['rollup']['array']  else None ,
+          'subcategory_id':    item['properties']['Подкатегория']['relation'][0]['id']                     if item['properties']['Подкатегория']['relation']      else None ,
+          'account_id':        item['properties']['Сметка']['rollup']['array'][0]['relation'][0]['id']     if item['properties']['Сметка']['rollup']['array']     else None ,
+          'created_time':      item['created_time']                                                                                                                         ,
+          'last_edited_time':  item['last_edited_time']                                                                                                                     
           }
         )
 
@@ -57,7 +59,7 @@ for i, item in enumerate(inc_exp):
 df = pd.DataFrame(db_inc_exp_data)
 
 # Load extracted data to the postgres database
-df.to_sql(name='inc_exp_src', schema='01_src', con=engine, if_exists='delete_rows', index=False)
+df.to_sql(name='transaction', schema='01_src', con=engine, if_exists='delete_rows', index=False)
 
 # print(df.iloc[13])
 
