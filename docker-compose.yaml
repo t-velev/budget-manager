@@ -52,6 +52,31 @@ services:
     command: python src/extract_ntn_years.py
     container_name: extract_ntn_years
 
+  extract_ntn_months:
+    <<: *python-base
+    command: python src/extract_ntn_months.py
+    container_name: extract_ntn_months    
+
+  extract_ntn_categories:
+    <<: *python-base
+    command: python src/extract_ntn_categories.py
+    container_name: extract_ntn_categories   
+
+  extract_ntn_subcategories:
+    <<: *python-base
+    command: python src/extract_ntn_subcategories.py
+    container_name: extract_ntn_subcategories         
+
+  extract_ntn_budgets:
+    <<: *python-base
+    command: python src/extract_ntn_budgets.py
+    container_name: extract_ntn_budgets       
+
+  extract_ntn_accounts:
+    <<: *python-base
+    command: python src/extract_ntn_accounts.py
+    container_name: extract_ntn_accounts        
+
   extract_ntn_inc_exp:
     <<: *python-base
     command: python src/extract_ntn_inc_exp.py
