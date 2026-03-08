@@ -1,11 +1,11 @@
 x-py-scripts-template: &python-base
     build: .
+    profiles: ["manual"] # To not start with a general 'docker compose up'
     networks:
       - bm_network
     volumes:
       - ./src:/app/src
       - ./data:/app/data
-      
     environment:
       # --- NOTION CONFIG ---
       NOTION_API_KEY:             ${NOTION_API_KEY}
@@ -16,27 +16,54 @@ x-py-scripts-template: &python-base
       NOTION_DB_ID_BUDGETS:       ${NOTION_DB_ID_BUDGETS}
       NOTION_DB_ID_ACCOUNTS:      ${NOTION_DB_ID_ACCOUNTS}
       NOTION_DB_ID_INC_EXP:       ${NOTION_DB_ID_INC_EXP}
-
       # --- DATABASE CONFIG ---
       POSTGRES_USER:              ${POSTGRES_USER}
       POSTGRES_PASSWORD:          ${POSTGRES_PASSWORD}
       POSTGRES_DB:                ${POSTGRES_DB}
-
     depends_on:
       database:
         condition: service_healthy 
 
-services:
+x-airflow-common: &airflow-common
+  image: ${AIRFLOW_IMAGE_NAME:-apache/airflow:3.1.7}
+  environment:
+    &airflow-common-env
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${AF_POSTGRES_USER}:${AF_POSTGRES_PASSWORD}@airflow-db/${AF_POSTGRES_DB}
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+    AIRFLOW__CORE__AUTH_MANAGER: airflow.providers.fab.auth_manager.fab_auth_manager.FabAuthManager
+    # For Airflow to see my project variables
+    NOTION_API_KEY:     ${NOTION_API_KEY}
+    POSTGRES_USER:      ${POSTGRES_USER}
+    POSTGRES_PASSWORD:  ${POSTGRES_PASSWORD}
+    POSTGRES_DB:        ${POSTGRES_DB}
+    POSTGRES_HOST:      database  # My existing budget manager DB container
+  volumes:
+    - ./airflow/dags:/opt/airflow/dags
+    - ./airflow/logs:/opt/airflow/logs
+    - ./airflow/config:/opt/airflow/config    
+    - ./airflow/plugins:/opt/airflow/plugins
+    - ./src:/opt/airflow/src   
+    - ./data:/opt/airflow/data  
+  user: "${AIRFLOW_UID:-50000}:0"
+  networks:
+    - bm_network
+  depends_on:
+    airflow-db:
+      condition: service_healthy
 
+
+services:
+# --- BUDGET MANAGER DATABASE ---
   database:
     image: postgres:18
     container_name: postgres
     networks:
       - bm_network
     environment:
-      POSTGRES_USER:              ${POSTGRES_USER}
-      POSTGRES_PASSWORD:          ${POSTGRES_PASSWORD}
-      POSTGRES_DB:                ${POSTGRES_DB}
+      POSTGRES_USER:     ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB:       ${POSTGRES_DB}
     ports:
       - "5433:5432"
     volumes:
@@ -47,6 +74,7 @@ services:
       timeout: 5s
       retries: 5   
 
+# --- PYTHON SERVICES ---
   extract_ntn_years:
     <<: *python-base
     command: python src/extract_ntn_years.py
@@ -81,11 +109,65 @@ services:
     <<: *python-base
     command: python src/extract_ntn_inc_exp.py
     container_name: extract_ntn_inc_exp
-    
+
+# --- AIRFLOW SERVICES ---
+  airflow-db:
+    image: postgres:17-alpine
+    container_name: airflow_postgres
+    volumes:
+      - af_pg_storage:/var/lib/postgresql/data  
+    networks:
+      - bm_network
+    environment:
+      POSTGRES_USER:     ${AF_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${AF_POSTGRES_PASSWORD}
+      POSTGRES_DB:       ${AF_POSTGRES_DB}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${AF_POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  airflow-api-server:
+    <<: *airflow-common
+    command: api-server
+    container_name: airflow_webserver
+    ports:
+      - "8081:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/api/v2/monitor/health"]      
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: always      
+
+  airflow-scheduler:
+    <<: *airflow-common
+    command: scheduler
+    container_name: airflow_scheduler
+    restart: always
+
+  airflow-dag-processor:
+    <<: *airflow-common
+    command: dag-processor
+    restart: always    
+
+  airflow-init:
+    <<: *airflow-common
+    profiles: ["setup"] # To not start with a general 'docker compose up'
+    environment:
+      <<: *airflow-common-env
+      _AIRFLOW_DB_MIGRATE: 'true'
+      _AIRFLOW_WWW_USER_CREATE: 'true'
+      _AIRFLOW_WWW_USER_USERNAME: ${_AIRFLOW_WWW_USER_USERNAME:-airflow}
+      _AIRFLOW_WWW_USER_PASSWORD: ${_AIRFLOW_WWW_USER_PASSWORD:-airflow}
+      _PIP_ADDITIONAL_REQUIREMENTS: ''
+    user: "0:0"    
+
 networks:
   bm_network:
     driver: bridge
 
 volumes:
-  pg_storage: 
-    
+  pg_storage:
+  af_pg_storage: 
