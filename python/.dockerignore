@@ -1,0 +1,23 @@
+# Python bytecode
+**/__pycache__/
+**/*.py[cod]
+
+# Environments
+.env
+.venv
+venv/
+env/
+
+# Git
+.git
+.gitignore
+
+# Local Data/Tests (Optional)
+data/
+tests/
+.pytest_cache/
+
+# IDEs
+.vscode/
+.idea/
+.DS_Store

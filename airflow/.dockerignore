@@ -1,0 +1,50 @@
+# Git
+.git
+.gitignore
+
+# Docker
+docker-compose.yaml
+docker-compose.override.yaml
+.dockerignore
+
+# Python
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+**/*.pyd
+.Python
+env/
+bin/
+lib/
+develop-eggs/
+dist/
+eggs/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+.venv
+venv/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Airflow specific
+airflow/logs/
+airflow/plugins/
+airflow/airflow.db
+airflow/airflow-webserver.pid
+airflow/unittests.cfg
+
+# Environments & Secrets
+.env
+.env.*
+.secrets
+
+# IDEs and OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

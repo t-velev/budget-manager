@@ -29,6 +29,9 @@ x-py-scripts-template: &python-base
         condition: service_healthy 
 
 x-airflow-common: &airflow-common
+  build:
+    context: .
+    dockerfile: airflow/Dockerfile
   image: ${AIRFLOW_IMAGE_NAME:-apache/airflow:3.1.7}
   environment:
     &airflow-common-env
@@ -39,7 +42,6 @@ x-airflow-common: &airflow-common
     AIRFLOW__CORE__EXECUTION_API_SERVER_URL: http://airflow-api-server:8080/execution/
     AIRFLOW__CORE__INTERNAL_API_SECRET_KEY: b3c07359b1d86bf033b7c0a6d1db929b9654d7939d95db82438b196b6d8005cd     
     AIRFLOW__API_AUTH__JWT_SECRET: 8a1f2b3c4d5e6f7a8b9c0d1e2f3a4b5c8a1f2b3c4d5e6f7a8b9c0d1e2f3a4b5c  
-    # _PIP_ADDITIONAL_DEPENDENCIES: "pandas sqlalchemy psycopg2-binary requests"
 
     # For Airflow to see my project variables
     # --- NOTION CONFIG ---
