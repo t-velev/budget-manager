@@ -28,6 +28,40 @@ x-py-scripts-template: &python-base
       budget-db:
         condition: service_healthy 
 
+x-dbt-common: &dbt-common
+  build:
+    context: .
+    dockerfile: dbt/Dockerfile
+    target: dbt-postgres 
+  image: dbt-postgres:latest
+  environment:
+    &dbt-common-env
+    DBT_PROFILES_DIR: /usr/app/dbt/budget_manager  # For dbt to store/look for profiles here     
+    DBT_PROJECT_DIR:  /usr/app/dbt/budget_manager  # For dbt to store/look for dbt_project.yml here     
+    user: "${UID:-1000}:${GID:-1000}" 
+    # For DBT to see my project variables
+    # --- NOTION CONFIG ---
+    NOTION_API_KEY:             ${NOTION_API_KEY}
+    NOTION_DB_ID_YEARS:         ${NOTION_DB_ID_YEARS}
+    NOTION_DB_ID_MONTHS:        ${NOTION_DB_ID_MONTHS}
+    NOTION_DB_ID_CATEGORIES:    ${NOTION_DB_ID_CATEGORIES}
+    NOTION_DB_ID_SUBCATEGORIES: ${NOTION_DB_ID_SUBCATEGORIES}
+    NOTION_DB_ID_BUDGETS:       ${NOTION_DB_ID_BUDGETS}
+    NOTION_DB_ID_ACCOUNTS:      ${NOTION_DB_ID_ACCOUNTS}
+    NOTION_DB_ID_INC_EXP:       ${NOTION_DB_ID_INC_EXP}
+    # --- DATABASE CONFIG ---
+    POSTGRES_USER:              ${POSTGRES_USER}
+    POSTGRES_PASSWORD:          ${POSTGRES_PASSWORD}
+    POSTGRES_DB:                ${POSTGRES_DB}
+    POSTGRES_HOST:              budget-db  # My existing budget manager DB container
+  networks:
+    - bm_network    
+  volumes:
+    - ./dbt:/usr/app/dbt
+  depends_on:
+      budget-db:
+        condition: service_healthy 
+
 x-airflow-common: &airflow-common
   build:
     context: .
@@ -184,6 +218,21 @@ services:
       _PIP_ADDITIONAL_REQUIREMENTS: ''
     user: "0:0"    
 
+# --- DBT SERVICES ---
+  dbt:
+    <<: *dbt-common
+    profiles: ["setup"] # To not start with a general 'docker compose up'
+    environment:
+      <<: *dbt-common-env
+
+  dbt-docs:
+      <<: *dbt-common
+      command: docs serve --port 8082 --host 0.0.0.0  # --host 0.0.0.0 to allow Docker to route traffic to the port
+      profiles: ["docs"]
+      ports:
+        - "8082:8082"
+
+# --- MISC ---
 networks:
   bm_network:
     driver: bridge
