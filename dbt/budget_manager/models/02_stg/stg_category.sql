@@ -1,9 +1,9 @@
 with
 
-    CATEGORY as ( select 
+    CATEGORY as ( select
                          cast( c.id                as VARCHAR(100) )   as category_id_bk   ,
                          cast( c.title             as VARCHAR(50)  )   as category_name    ,
-                         cast( c.type              as VARCHAR(20)  )   as category_type    ,
+                         cast( c.type              as VARCHAR(20)  )   as category_type    , -- [Приход, Разход]
                          ---
                          cast( c.is_archived       as VARCHAR(5)   )   as is_archived      ,
                          cast( c.created_time      as TIMESTAMP    )   as created_time     ,
@@ -15,5 +15,6 @@ with
 --------------------------------------------------------------
 -- MAIN QRY
 --------------------------------------------------------------
-select *
-from CATEGORY t
+select t.*
+       ---
+from   CATEGORY t
