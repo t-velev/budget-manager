@@ -7,31 +7,31 @@ models:
     description: "List of savings accounts."
     config:
       materialized: view
-      unique_key: acc_id_bk
+      unique_key: account_id_bk
     columns:
       # ---------------------
-      - name: acc_id_bk  
+      - name: account_id_bk
         data_tests:
           - unique
           - not_null
       # ---------------------
-      - name: acc_name
+      - name: account_name
         data_tests:
-          - not_null   
+          - not_null
       # ---------------------
-      - name: is_archived  
+      - name: is_archived
         data_tests:
         - accepted_values:
             arguments:
-              values: ['true', 'false']             
+              values: ['true', 'false']
       # ---------------------
-      - name: created_time  
+      - name: created_time
         data_tests:
-          - not_null         
+          - not_null
       # ---------------------
-      - name: last_edited_time                       
+      - name: last_edited_time
         data_tests:
-          - not_null          
+          - not_null
 
 
 # ---------------------------------------
@@ -44,28 +44,28 @@ models:
       unique_key: budget_id_bk
     columns:
       # ---------------------
-      - name: budget_id_bk  
+      - name: budget_id_bk
         data_tests:
           - unique
           - not_null
       # ---------------------
-      - name: budget_name      
+      - name: budget_name
       # ---------------------
-      - name: budget_amnt      
+      - name: budget_amount
       # ---------------------
-      - name: is_archived  
+      - name: is_archived
         data_tests:
         - accepted_values:
             arguments:
-              values: ['true', 'false']            
+              values: ['true', 'false']
       # ---------------------
-      - name: created_time  
+      - name: created_time
         data_tests:
-          - not_null         
+          - not_null
       # ---------------------
-      - name: last_edited_time                       
+      - name: last_edited_time
         data_tests:
-          - not_null      
+          - not_null
 
 
 # ---------------------------------------
@@ -78,35 +78,35 @@ models:
       unique_key: category_id_bk
     columns:
       # ---------------------
-      - name: category_id_bk  
+      - name: category_id_bk
         data_tests:
           - unique
           - not_null
       # ---------------------
-      - name: category_name 
+      - name: category_name
         data_tests:
-          - not_null     
+          - not_null
       # ---------------------
-      - name: category_type 
+      - name: category_type
         data_tests:
           - not_null
           - accepted_values:
-              arguments: 
+              arguments:
                 values: ['Приход', 'Разход']
       # ---------------------
-      - name: is_archived  
+      - name: is_archived
         data_tests:
         - accepted_values:
             arguments:
-              values: ['true', 'false']   
+              values: ['true', 'false']
       # ---------------------
-      - name: created_time  
+      - name: created_time
         data_tests:
-          - not_null         
+          - not_null
       # ---------------------
-      - name: last_edited_time                       
+      - name: last_edited_time
         data_tests:
-          - not_null        
+          - not_null
 
 
 # ---------------------------------------
@@ -119,26 +119,26 @@ models:
       unique_key: month_id_bk
     columns:
       # ---------------------
-      - name: month_id_bk  
+      - name: month_id_bk
         data_tests:
           - unique
           - not_null
       # ---------------------
       - name: month_name
         data_tests:
-          - not_null   
+          - not_null
           - accepted_values:
               arguments:
-                values: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 
-                         'August', 'September', 'October', 'November', 'December']   
+                values: ['January', 'February', 'March', 'April', 'May', 'June', 'July',
+                         'August', 'September', 'October', 'November', 'December']
       # ---------------------
-      - name: created_time  
+      - name: created_time
         data_tests:
-          - not_null         
+          - not_null
       # ---------------------
-      - name: last_edited_time                       
+      - name: last_edited_time
         data_tests:
-          - not_null              
+          - not_null
 
 
 # ---------------------------------------
@@ -151,38 +151,39 @@ models:
       unique_key: subcategory_id_bk
     columns:
       # ---------------------
-      - name: subcategory_id_bk  
+      - name: subcategory_id_bk
         data_tests:
           - unique
           - not_null
       # ---------------------
-      - name: subcategory_name 
+      - name: subcategory_name
         data_tests:
-          - not_null     
+          - not_null
       # ---------------------
-      - name: subcategory_type 
+      - name: subcategory_type
         data_tests:
           - not_null
           - accepted_values:
-              arguments: ['Приход', 'Разход']
+              arguments:
+                values: ['Приход', 'Разход']
       # ---------------------
-      - name: priority              
+      - name: priority
       # ---------------------
-      - name: due_date  
+      - name: due_date
       # ---------------------
-      - name: is_archived  
+      - name: is_archived
         data_tests:
         - accepted_values:
             arguments:
-              values: ['true', 'false']   
+              values: ['true', 'false']
       # ---------------------
-      - name: created_time  
+      - name: created_time
         data_tests:
-          - not_null         
+          - not_null
       # ---------------------
-      - name: last_edited_time                       
+      - name: last_edited_time
         data_tests:
-          - not_null            
+          - not_null
 
 
 # ---------------------------------------
@@ -195,40 +196,40 @@ models:
       unique_key: transaction_id_bk
     columns:
       # ---------------------
-      - name: transaction_id_bk  
+      - name: transaction_id_bk
         data_tests:
           - unique
           - not_null
       # ---------------------
       - name: transaction_name
         data_tests:
-          - not_null   
+          - not_null
       # ---------------------
-      - name: transaction_type   
-        data_tests:
-          - not_null      
-      # ---------------------
-      - name: transaction_date   
+      - name: transaction_type
         data_tests:
           - not_null
       # ---------------------
-      - name: transaction_amnt   
-        data_tests:
-          - not_null          
-      # ---------------------
-      - name: transaction_status 
+      - name: transaction_date
         data_tests:
           - not_null
       # ---------------------
-      - name: note               
-      # ---------------------
-      - name: created_time       
+      - name: transaction_amount
         data_tests:
-          - not_null         
+          - not_null
       # ---------------------
-      - name: last_edited_time                       
+      - name: transaction_status
         data_tests:
-          - not_null                              
+          - not_null
+      # ---------------------
+      - name: note
+      # ---------------------
+      - name: created_time
+        data_tests:
+          - not_null
+      # ---------------------
+      - name: last_edited_time
+        data_tests:
+          - not_null
 
 
 # ---------------------------------------
@@ -241,19 +242,19 @@ models:
       unique_key: year_id_bk
     columns:
       # ---------------------
-      - name: year_id_bk  
+      - name: year_id_bk
         data_tests:
           - unique
           - not_null
       # ---------------------
       - name: year_name
         data_tests:
-          - not_null   
+          - not_null
       # ---------------------
-      - name: created_time  
+      - name: created_time
         data_tests:
-          - not_null         
+          - not_null
       # ---------------------
-      - name: last_edited_time                       
+      - name: last_edited_time
         data_tests:
-          - not_null         
+          - not_null

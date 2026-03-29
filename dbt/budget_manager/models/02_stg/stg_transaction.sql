@@ -7,7 +7,7 @@ with
                             cast( t.type              as VARCHAR(20)   )  as transaction_type   , -- [Приход, Разход, Трансфер приход, Трансфер разход]
                             ---
                             cast( t.date              as DATE          )  as transaction_date   ,
-                            cast( t.amount            as NUMERIC(27,2) )  as transaction_amnt   ,
+                            cast( t.amount            as NUMERIC(27,2) )  as transaction_amount ,
                             cast( t.status            as VARCHAR(15)   )  as transaction_status , -- [Платено, Предстои, В процес]
                             ---
                             cast( t.note              as VARCHAR(1000) )  as note               ,

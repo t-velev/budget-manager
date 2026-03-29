@@ -1,0 +1,11 @@
+snapshots:
+  - name: dim_category
+    relation: ref('stg_category')
+    config:
+      schema: 03_dwh
+      unique_key: category_id_bk
+      check_cols:
+        - category_id_bk
+        - category_name
+        - category_type
+        - is_archived

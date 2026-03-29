@@ -31,5 +31,22 @@ clean-targets:         # directories to be removed by `dbt clean`
 # files using the `{{ config(...) }}` macro.
 models:
   budget_manager:
-    # Config indicated by + and applies to all files under models/example/
+    02_stg:
+      +schema: 02_stg
+    03_dwh:
+      +schema: 03_dwh
+
+snapshots:
+  budget_manager:
+  # +schema: 03_dwh  # I have to use it in each individual snap config, because here it's overwriten by the profiles.yml file.
+    +database: "{{ env_var('POSTGRES_DB') }}"
+    +strategy: check
+    +updated_at: last_edited_time
+    +snapshot_meta_column_names: { 'dbt_scd_id'     : 'dk'              , 
+                                   'dbt_updated_at' : 'scd2_updated_at' , 
+                                   'dbt_valid_from' : 'scd2_valid_from' , 
+                                   'dbt_valid_to'   : 'scd2_valid_to'
+                                  }
+    +dbt_valid_to_current: "to_date('9999-12-31', 'YYYY-MM-DD')"
+    +hard_deletes: invalidate     
 

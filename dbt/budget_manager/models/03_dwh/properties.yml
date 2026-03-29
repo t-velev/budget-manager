@@ -1,0 +1,36 @@
+models:
+
+# ---------------------------------------
+# FACT_TRANSACTION
+# ---------------------------------------
+  - name: fact_transaction
+    description: "Transaction records."
+    config:
+      materialized: table
+      unique_key: transaction_id_bk
+    columns:
+      # ---------------------
+      - name: transaction_id_bk
+        data_tests:
+          - unique
+          - not_null
+      # ---------------------
+      - name: account_dk
+        data_tests:
+          - not_null
+      # ---------------------
+      - name: category_dk
+        data_tests:
+          - not_null
+      # ---------------------
+      - name: subcategory_dk
+        data_tests:
+          - not_null
+      # ---------------------
+      - name: year_dk
+        data_tests:
+          - not_null
+      # ---------------------
+      - name: month_dk
+        data_tests:
+          - not_null
