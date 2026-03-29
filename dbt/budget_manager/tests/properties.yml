@@ -1,0 +1,8 @@
+data_tests:
+  - name: transaction_amount_is_null
+    description: >
+      All done transactions must have a transaction amount value,
+      but there maybe individual cases, where this won't be true.
+      Because of that, the test is set with "severity = warning".
+    config:
+      severity: warn
