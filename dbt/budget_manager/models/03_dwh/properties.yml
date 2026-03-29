@@ -18,19 +18,49 @@ models:
       - name: account_dk
         data_tests:
           - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_account')
+                field: dk
+              config:
+                severity: error
       # ---------------------
       - name: category_dk
         data_tests:
           - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_category')
+                field: dk
+              config:
+                severity: error          
       # ---------------------
       - name: subcategory_dk
         data_tests:
           - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_subcategory')
+                field: dk
+              config:
+                severity: error          
       # ---------------------
       - name: year_dk
         data_tests:
           - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_year')
+                field: dk
+              config:
+                severity: error          
       # ---------------------
       - name: month_dk
         data_tests:
           - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_month')
+                field: dk
+              config:
+                severity: error          
