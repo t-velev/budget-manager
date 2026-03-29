@@ -1,0 +1,260 @@
+models:
+
+# ---------------------------------------
+# STG_ACCOUNT
+# ---------------------------------------
+  - name: stg_account
+    description: "List of savings accounts."
+    config:
+      materialized: view
+      unique_key: account_id_bk
+    columns:
+      # ---------------------
+      - name: account_id_bk
+        data_tests:
+          - unique
+          - not_null
+      # ---------------------
+      - name: account_name
+        data_tests:
+          - not_null
+      # ---------------------
+      - name: is_archived
+        data_tests:
+        - accepted_values:
+            arguments:
+              values: ['true', 'false']
+      # ---------------------
+      - name: created_time
+        data_tests:
+          - not_null
+      # ---------------------
+      - name: last_edited_time
+        data_tests:
+          - not_null
+
+
+# ---------------------------------------
+# STG_BUDGET
+# ---------------------------------------
+  - name: stg_budget
+    description: "Monthly budget amount for each subcategory"
+    config:
+      materialized: view
+      unique_key: budget_id_bk
+    columns:
+      # ---------------------
+      - name: budget_id_bk
+        data_tests:
+          - unique
+          - not_null
+      # ---------------------
+      - name: budget_name
+      # ---------------------
+      - name: budget_amount
+      # ---------------------
+      - name: is_archived
+        data_tests:
+        - accepted_values:
+            arguments:
+              values: ['true', 'false']
+      # ---------------------
+      - name: created_time
+        data_tests:
+          - not_null
+      # ---------------------
+      - name: last_edited_time
+        data_tests:
+          - not_null
+
+
+# ---------------------------------------
+# STG_CATEGORY
+# ---------------------------------------
+  - name: stg_category
+    description: "List of budget categories."
+    config:
+      materialized: view
+      unique_key: category_id_bk
+    columns:
+      # ---------------------
+      - name: category_id_bk
+        data_tests:
+          - unique
+          - not_null
+      # ---------------------
+      - name: category_name
+        data_tests:
+          - not_null
+      # ---------------------
+      - name: category_type
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['Приход', 'Разход']
+      # ---------------------
+      - name: is_archived
+        data_tests:
+        - accepted_values:
+            arguments:
+              values: ['true', 'false']
+      # ---------------------
+      - name: created_time
+        data_tests:
+          - not_null
+      # ---------------------
+      - name: last_edited_time
+        data_tests:
+          - not_null
+
+
+# ---------------------------------------
+# STG_MONTH
+# ---------------------------------------
+  - name: stg_month
+    description: "List of months of the year."
+    config:
+      materialized: view
+      unique_key: month_id_bk
+    columns:
+      # ---------------------
+      - name: month_id_bk
+        data_tests:
+          - unique
+          - not_null
+      # ---------------------
+      - name: month_name
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['January', 'February', 'March', 'April', 'May', 'June', 'July',
+                         'August', 'September', 'October', 'November', 'December']
+      # ---------------------
+      - name: created_time
+        data_tests:
+          - not_null
+      # ---------------------
+      - name: last_edited_time
+        data_tests:
+          - not_null
+
+
+# ---------------------------------------
+# STG_SUBCATEGORY
+# ---------------------------------------
+  - name: stg_subcategory
+    description: "List of budget subcategories."
+    config:
+      materialized: view
+      unique_key: subcategory_id_bk
+    columns:
+      # ---------------------
+      - name: subcategory_id_bk
+        data_tests:
+          - unique
+          - not_null
+      # ---------------------
+      - name: subcategory_name
+        data_tests:
+          - not_null
+      # ---------------------
+      - name: subcategory_type
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['Приход', 'Разход']
+      # ---------------------
+      - name: priority
+      # ---------------------
+      - name: due_date
+      # ---------------------
+      - name: is_archived
+        data_tests:
+        - accepted_values:
+            arguments:
+              values: ['true', 'false']
+      # ---------------------
+      - name: created_time
+        data_tests:
+          - not_null
+      # ---------------------
+      - name: last_edited_time
+        data_tests:
+          - not_null
+
+
+# ---------------------------------------
+# STG_TRANSACTION
+# ---------------------------------------
+  - name: stg_transaction
+    description: "Daily transactions."
+    config:
+      materialized: view
+      unique_key: transaction_id_bk
+    columns:
+      # ---------------------
+      - name: transaction_id_bk
+        data_tests:
+          - unique
+          - not_null
+      # ---------------------
+      - name: transaction_name
+        data_tests:
+          - not_null
+      # ---------------------
+      - name: transaction_type
+        data_tests:
+          - not_null
+      # ---------------------
+      - name: transaction_date
+        data_tests:
+          - not_null
+      # ---------------------
+      - name: transaction_amount
+        data_tests:
+          - not_null
+      # ---------------------
+      - name: transaction_status
+        data_tests:
+          - not_null
+      # ---------------------
+      - name: note
+      # ---------------------
+      - name: created_time
+        data_tests:
+          - not_null
+      # ---------------------
+      - name: last_edited_time
+        data_tests:
+          - not_null
+
+
+# ---------------------------------------
+# STG_YEAR
+# ---------------------------------------
+  - name: stg_year
+    description: "List of years."
+    config:
+      materialized: view
+      unique_key: year_id_bk
+    columns:
+      # ---------------------
+      - name: year_id_bk
+        data_tests:
+          - unique
+          - not_null
+      # ---------------------
+      - name: year_name
+        data_tests:
+          - not_null
+      # ---------------------
+      - name: created_time
+        data_tests:
+          - not_null
+      # ---------------------
+      - name: last_edited_time
+        data_tests:
+          - not_null

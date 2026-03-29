@@ -9,7 +9,7 @@ with
                        cast( b.category_id       as VARCHAR(100)  )   as category_id       ,
                        cast( b.subcategory_id    as VARCHAR(100)  )   as subcategory_id    ,
                        ---
-                       cast( b.budget_amnt       as NUMERIC(27,2) )   as budget_amnt       ,
+                       cast( b.budget_amnt       as NUMERIC(27,2) )   as budget_amount     ,
                        ---
                        cast( b.is_archived       as VARCHAR(5)    )   as is_archived       ,
                        cast( b.created_time      as TIMESTAMP     )   as created_time      ,
