@@ -18,3 +18,13 @@ with
 select t.*
        ---
 from   CATEGORY t
+
+union all
+
+-- System record to prevent null fact table FK
+select '-1'             as category_id_bk   ,
+       '-1'             as category_name    ,
+       '-1'             as category_type    ,
+       'false'          as is_archived      ,
+       DATE'1990-01-01' as created_time     ,
+       DATE'1990-01-01' as last_edited_time

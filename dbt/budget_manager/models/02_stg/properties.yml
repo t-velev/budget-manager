@@ -92,7 +92,7 @@ models:
           - not_null
           - accepted_values:
               arguments:
-                values: ['Приход', 'Разход']
+                values: ['Приход', 'Разход', '-1']
       # ---------------------
       - name: is_archived
         data_tests:
@@ -130,7 +130,7 @@ models:
           - accepted_values:
               arguments:
                 values: ['January', 'February', 'March', 'April', 'May', 'June', 'July',
-                         'August', 'September', 'October', 'November', 'December']
+                         'August', 'September', 'October', 'November', 'December', '-1']
       # ---------------------
       - name: created_time
         data_tests:
@@ -165,7 +165,7 @@ models:
           - not_null
           - accepted_values:
               arguments:
-                values: ['Приход', 'Разход']
+                values: ['Приход', 'Разход', '-1']
       # ---------------------
       - name: priority
       # ---------------------

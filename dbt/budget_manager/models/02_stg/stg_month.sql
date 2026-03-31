@@ -16,3 +16,11 @@ with
 select t.*
        ---
 from   MONTH t
+
+union all
+
+-- System record to prevent null fact table FK
+select '-1'             as month_id_bk      ,
+       '-1'             as month_name       ,
+       DATE'1990-01-01' as created_time     ,
+       DATE'1990-01-01' as last_edited_time

@@ -116,11 +116,11 @@ select t.transaction_id_bk    as transaction_id_bk  ,
        ---
        t.note                 as note               ,
        ---
-       a.dk                   as account_dk         ,
-       c.dk                   as category_dk        ,
-       s.dk                   as subcategory_dk     ,
-       y.dk                   as year_dk            ,
-       m.dk                   as month_dk
+       coalesce(a.dk, '-1')   as account_dk         ,
+       coalesce(c.dk, '-1')   as category_dk        ,
+       coalesce(s.dk, '-1')   as subcategory_dk     ,
+       coalesce(y.dk, '-1')   as year_dk            ,
+       coalesce(m.dk, '-1')   as month_dk
        ---
        ---
 from   TRANSACTION t

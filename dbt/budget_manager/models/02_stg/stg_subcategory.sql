@@ -21,3 +21,15 @@ with
 select t.*
        ---
 from   SUBCATEGORY t
+
+union all
+
+-- System record to prevent null fact table FK
+select '-1'                as subcategory_id_bk ,
+       '-1'                as subcategory_name  ,
+       '-1'                as subcategory_type  ,
+       '-1'                as priority          ,
+       null                as due_date          ,
+       'false'             as is_archived       ,
+       DATE'1990-01-01'    as created_time      ,
+       DATE'1990-01-01'    as last_edited_time

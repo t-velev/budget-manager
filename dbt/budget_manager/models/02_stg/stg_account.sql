@@ -15,5 +15,14 @@ with
 -- MAIN QRY
 --------------------------------------------------------------
 select t.*
-       --- 
+       ---
 from   ACCOUNT t
+
+union all
+
+-- System record to prevent null fact table FK
+select '-1'             as account_id_bk    ,
+       '-1'             as account_name     ,
+       'false'          as is_archived      ,
+       DATE'1990-01-01' as created_time     ,
+       DATE'1990-01-01' as last_edited_time
