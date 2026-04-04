@@ -1,16 +1,4 @@
 ------------------------------------
--- DROP PRIMARY KEY
-------------------------------------
-{% macro drop_pk() %}
-    do $$
-    begin
-        if exists (select * from information_schema.tables t where t.table_name = '{{ this.table }}') then
-            alter table {{ this }} drop constraint if exists {{ this.table }}_pk;
-        end if;
-    end $$;
-{% endmacro %}
-
-------------------------------------
 -- CREATE PRIMARY KEY
 ------------------------------------
 {% macro create_pk(column_name) %}
@@ -24,17 +12,19 @@
     end $$;
 {% endmacro %}
 
+
 ------------------------------------
--- DROP FOREIGN KEY
+-- DROP PRIMARY KEY
 ------------------------------------
-{% macro drop_fk(child_col_name) %}
+{% macro drop_pk() %}
     do $$
     begin
         if exists (select * from information_schema.tables t where t.table_name = '{{ this.table }}') then
-            alter table {{ this }} drop constraint if exists {{ this.table }}_{{ child_col_name }}_fk;  
+            alter table {{ this }} drop constraint if exists {{ this.table }}_pk;
         end if;
-    end $$;                   
+    end $$;
 {% endmacro %}
+
 
 ------------------------------------
 -- CREATE FOREIGN KEY
@@ -49,6 +39,20 @@
         end if;
     end $$;
 {% endmacro %}
+
+
+------------------------------------
+-- DROP FOREIGN KEY
+------------------------------------
+{% macro drop_fk(child_col_name) %}
+    do $$
+    begin
+        if exists (select * from information_schema.tables t where t.table_name = '{{ this.table }}') then
+            alter table {{ this }} drop constraint if exists {{ this.table }}_{{ child_col_name }}_fk;  
+        end if;
+    end $$;                   
+{% endmacro %}
+
 
 ------------------------------------
 -- SET NOT NULL
