@@ -16,3 +16,7 @@ snapshots:
         - account_id
         - category_id
         - subcategory_id
+      pre_hook:
+        - "{{ drop_pk() }}"
+      post_hook:
+        - "{{ create_pk('dk') }}"        

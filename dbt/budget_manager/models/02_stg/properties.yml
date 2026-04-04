@@ -21,9 +21,10 @@ models:
       # ---------------------
       - name: is_archived
         data_tests:
-        - accepted_values:
-            arguments:
-              values: ['true', 'false']
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['true', 'false', '-1']
       # ---------------------
       - name: created_time
         data_tests:
@@ -55,9 +56,10 @@ models:
       # ---------------------
       - name: is_archived
         data_tests:
-        - accepted_values:
-            arguments:
-              values: ['true', 'false']
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['true', 'false', '-1']
       # ---------------------
       - name: created_time
         data_tests:
@@ -96,9 +98,10 @@ models:
       # ---------------------
       - name: is_archived
         data_tests:
-        - accepted_values:
-            arguments:
-              values: ['true', 'false']
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['true', 'false', '-1']
       # ---------------------
       - name: created_time
         data_tests:
@@ -173,9 +176,10 @@ models:
       # ---------------------
       - name: is_archived
         data_tests:
-        - accepted_values:
-            arguments:
-              values: ['true', 'false']
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['true', 'false', '-1']
       # ---------------------
       - name: created_time
         data_tests:

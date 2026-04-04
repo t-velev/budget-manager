@@ -8,59 +8,75 @@ models:
     config:
       materialized: table
       unique_key: transaction_id_bk
+      pre_hook:
+        - "{{ drop_pk() }}"
+        - "{{ drop_fk('account_dk') }}"
+        - "{{ drop_fk('category_dk') }}"
+        - "{{ drop_fk('month_dk') }}"
+        - "{{ drop_fk('subcategory_dk') }}"
+        - "{{ drop_fk('year_dk') }}"
+      post_hook:
+        - "{{ create_pk('transaction_id_bk') }}"
+        - "{{ create_fk('account_dk', ref('dim_account'), 'dk') }}"
+        - "{{ create_fk('category_dk', ref('dim_category'), 'dk') }}"
+        - "{{ create_fk('month_dk', ref('dim_month'), 'dk') }}"
+        - "{{ create_fk('subcategory_dk', ref('dim_subcategory'), 'dk') }}"
+        - "{{ create_fk('year_dk', ref('dim_year'), 'dk') }}"
+
     columns:
       # ---------------------
       - name: transaction_id_bk
+        data_type: varchar(100)
+        constraints:
+          - type: not_null
         data_tests:
-          - unique
           - not_null
+      # ---------------------
+      - name: transaction_name
+        data_type: varchar(50)
+      # ---------------------
+      - name: transaction_type
+        data_type: varchar(20)
+        constraints:
+          - type: not_null
+      # ---------------------
+      - name: transaction_date
+        data_type: date
+        constraints:
+          - type: not_null
+      # ---------------------
+      - name: transaction_amount
+        data_type: numeric(27,2)
+      # ---------------------
+      - name: transaction_status
+        data_type: varchar(15)
+        constraints:
+          - type: not_null
+      # ---------------------
+      - name: note
+        data_type: varchar(1000)
       # ---------------------
       - name: account_dk
+        data_type: varchar(100)
         data_tests:
           - not_null
-          - relationships:
-              arguments:
-                to: ref('dim_account')
-                field: dk
-              config:
-                severity: error
       # ---------------------
       - name: category_dk
+        data_type: varchar(100)
         data_tests:
           - not_null
-          - relationships:
-              arguments:
-                to: ref('dim_category')
-                field: dk
-              config:
-                severity: error          
       # ---------------------
       - name: subcategory_dk
+        data_type: varchar(100)
         data_tests:
           - not_null
-          - relationships:
-              arguments:
-                to: ref('dim_subcategory')
-                field: dk
-              config:
-                severity: error          
       # ---------------------
       - name: year_dk
+        data_type: varchar(100)
         data_tests:
           - not_null
-          - relationships:
-              arguments:
-                to: ref('dim_year')
-                field: dk
-              config:
-                severity: error          
       # ---------------------
       - name: month_dk
+        data_type: varchar(100)
         data_tests:
           - not_null
-          - relationships:
-              arguments:
-                to: ref('dim_month')
-                field: dk
-              config:
-                severity: error          

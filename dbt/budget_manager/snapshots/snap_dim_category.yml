@@ -9,3 +9,11 @@ snapshots:
         - category_name
         - category_type
         - is_archived
+      post_hook:
+        - "{{ create_pk('dk') }}"
+        - "{{ apply_not_null('category_id_bk') }}"
+        - "{{ apply_not_null('category_name') }}"
+        - "{{ apply_not_null('is_archived') }}"
+        - "{{ apply_not_null('category_type') }}"
+        - "{{ apply_not_null('created_time') }}"
+        - "{{ apply_not_null('last_edited_time') }}"
