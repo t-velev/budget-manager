@@ -20,7 +20,11 @@ snapshot-paths: ["snapshots"]
 
 clean-targets:         # directories to be removed by `dbt clean`
   - "target"
-  - "dbt_packages"
+
+# When partial parsing is enabled, dbt will use that internal manifest to determine which files have been changed (if any) since it last parsed the project. 
+# Then, it will only parse the changed files, or files related to those changes.
+flags:
+  partial_parse: false # Turned off because it often misses to execute the accurate version of my changed files.
 
 data_tests:
   +store_failures: true
