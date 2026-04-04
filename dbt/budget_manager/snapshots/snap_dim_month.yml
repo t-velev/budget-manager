@@ -7,8 +7,15 @@ snapshots:
       check_cols:
         - month_id_bk
         - month_name
+
       post_hook:
+        # Create Primary key
         - "{{ create_pk('dk') }}"
+
+        # Create Unique index
+        - "{{ create_ui(['month_name', 'scd2_valid_to']) }}"
+
+        # Apply Not null
         - "{{ apply_not_null('month_id_bk') }}"
         - "{{ apply_not_null('month_name') }}"
         - "{{ apply_not_null('created_time') }}"

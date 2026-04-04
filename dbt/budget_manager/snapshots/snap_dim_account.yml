@@ -7,9 +7,16 @@ snapshots:
       check_cols:
         - account_id_bk
         - account_name
-        - is_archived
+        - is_archived     
+
       post_hook:
+        # Create Primary key
         - "{{ create_pk('dk') }}"
+
+        # Create Unique index
+        - "{{ create_ui(['account_name', 'scd2_valid_to']) }}"
+
+        # Apply Not null
         - "{{ apply_not_null('account_id_bk') }}"
         - "{{ apply_not_null('account_name') }}"
         - "{{ apply_not_null('is_archived') }}"

@@ -48,7 +48,6 @@ snapshots:
   # +schema: 03_dwh  # I have to use it in each individual snap config, because here it's overwriten by the profiles.yml file.
     +database: "{{ env_var('POSTGRES_DB') }}"
     +strategy: check
-    +updated_at: last_edited_time
     +snapshot_meta_column_names: { 'dbt_scd_id'     : 'dk'              , 
                                    'dbt_updated_at' : 'scd2_updated_at' , 
                                    'dbt_valid_from' : 'scd2_valid_from' , 

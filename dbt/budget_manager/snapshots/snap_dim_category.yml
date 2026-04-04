@@ -9,8 +9,15 @@ snapshots:
         - category_name
         - category_type
         - is_archived
+
       post_hook:
+        # Create Primary key
         - "{{ create_pk('dk') }}"
+
+        # Create Unique index
+        - "{{ create_ui(['category_name', 'scd2_valid_to']) }}"
+
+        # Apply Not null
         - "{{ apply_not_null('category_id_bk') }}"
         - "{{ apply_not_null('category_name') }}"
         - "{{ apply_not_null('is_archived') }}"

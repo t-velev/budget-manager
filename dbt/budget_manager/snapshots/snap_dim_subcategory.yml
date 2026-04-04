@@ -11,8 +11,15 @@ snapshots:
         - priority
         - due_date
         - is_archived
+        
       post_hook:
+        # Create Primary key
         - "{{ create_pk('dk') }}"
+
+        # Create Unique index
+        - "{{ create_ui(['subcategory_name', 'scd2_valid_to']) }}"
+
+        # Apply Not null
         - "{{ apply_not_null('subcategory_id_bk') }}"
         - "{{ apply_not_null('subcategory_name') }}"
         - "{{ apply_not_null('subcategory_type') }}"
