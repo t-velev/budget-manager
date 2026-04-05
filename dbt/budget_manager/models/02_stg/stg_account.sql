@@ -8,7 +8,7 @@ with
                         cast( a.created_time      as TIMESTAMP    )   as created_time     ,
                         cast( a.last_edited_time  as TIMESTAMP    )   as last_edited_time
                         ---
-                 from   {{ source('01_src', 'account') }} a
+                 from   {{ source('raw', 'account') }} a
                 )
 
 --------------------------------------------------------------

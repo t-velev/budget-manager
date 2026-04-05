@@ -21,7 +21,7 @@ with
                             cast( t.created_time      as TIMESTAMP     )  as created_time       ,
                             cast( t.last_edited_time  as TIMESTAMP     )  as last_edited_time
                             ---
-                     from   {{ source('01_src', 'transaction') }} t
+                     from   {{ source('raw', 'transaction') }} t
                     )
 
 --------------------------------------------------------------

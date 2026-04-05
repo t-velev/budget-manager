@@ -2,7 +2,7 @@ snapshots:
   - name: dim_subcategory
     relation: ref('stg_subcategory')
     config:
-      schema: 03_dwh
+      schema: warehouse
       unique_key: subcategory_id_bk
       check_cols:
         - subcategory_id_bk

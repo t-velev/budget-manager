@@ -12,7 +12,7 @@ with
                             cast( s.created_time      as TIMESTAMP    )   as created_time      ,
                             cast( s.last_edited_time  as TIMESTAMP    )   as last_edited_time
                             ---
-                     from   {{ source('01_src', 'subcategory') }} s
+                     from   {{ source('raw', 'subcategory') }} s
                    )
 
 --------------------------------------------------------------

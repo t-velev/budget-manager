@@ -9,7 +9,7 @@ with
                          cast( c.created_time      as TIMESTAMP    )   as created_time     ,
                          cast( c.last_edited_time  as TIMESTAMP    )   as last_edited_time
                          ---
-                  from   {{ source('01_src', 'category') }} c
+                  from   {{ source('raw', 'category') }} c
                 )
 
 --------------------------------------------------------------

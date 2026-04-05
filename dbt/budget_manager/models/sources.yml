@@ -1,7 +1,7 @@
 sources:
-  - name: 01_src
+  - name: raw
     database: "{{ env_var('POSTGRES_DB') }}"  
-    schema: 01_src
+    schema: raw
     tables:
       - name: account
       - name: budget

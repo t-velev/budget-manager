@@ -2,7 +2,7 @@ snapshots:
   - name: dim_category
     relation: ref('stg_category')
     config:
-      schema: 03_dwh
+      schema: warehouse
       unique_key: category_id_bk
       check_cols:
         - category_id_bk

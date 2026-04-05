@@ -2,7 +2,7 @@ snapshots:
   - name: transaction_audit_log
     relation: ref('stg_transaction')
     config:
-      schema: 03_dwh
+      schema: warehouse
       unique_key: transaction_id_bk
       check_cols:
         - transaction_id_bk

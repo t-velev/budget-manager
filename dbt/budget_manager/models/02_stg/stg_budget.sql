@@ -15,7 +15,7 @@ with
                        cast( b.created_time      as TIMESTAMP     )   as created_time      ,
                        cast( b.last_edited_time  as TIMESTAMP     )   as last_edited_time
                        ---
-                from   {{ source('01_src', 'budget') }} b
+                from   {{ source('raw', 'budget') }} b
               )
 
 --------------------------------------------------------------

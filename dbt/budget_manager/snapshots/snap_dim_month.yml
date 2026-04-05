@@ -2,7 +2,7 @@ snapshots:
   - name: dim_month
     relation: ref('stg_month')
     config:
-      schema: 03_dwh
+      schema: warehouse
       unique_key: month_id_bk
       check_cols:
         - month_id_bk

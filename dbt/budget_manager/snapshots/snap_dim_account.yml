@@ -2,7 +2,7 @@ snapshots:
   - name: dim_account
     relation: ref('stg_account')
     config:
-      schema: 03_dwh
+      schema: warehouse
       unique_key: account_id_bk
       check_cols:
         - account_id_bk

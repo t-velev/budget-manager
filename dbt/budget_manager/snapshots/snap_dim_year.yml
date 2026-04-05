@@ -2,7 +2,7 @@ snapshots:
   - name: dim_year
     relation: ref('stg_year')
     config:
-      schema: 03_dwh
+      schema: warehouse
       unique_key: year_id_bk
       check_cols:
         - year_id_bk

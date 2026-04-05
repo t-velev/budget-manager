@@ -3,7 +3,7 @@ budget_manager:
     dev:
       type: postgres
       host: budget-db
-      schema: 02_stg
+      schema: staging
       dbname: "{{ env_var('POSTGRES_DB') }}"
       user:   "{{ env_var('POSTGRES_USER') }}"
       pass:   "{{ env_var('POSTGRES_PASSWORD') }}"

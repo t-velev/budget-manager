@@ -50,9 +50,9 @@ df = pd.DataFrame(db_years_data)
 
 # During development, because Airflow comes with pandas v2.3, which doesn't support to_sql(if_exists='delete_rows')
 with engine.begin() as conn: 
-  conn.execute(text('DELETE FROM "01_src"."year"'))
+  conn.execute(text('DELETE FROM "raw"."year"'))
 
 # Load extracted data to the postgres budget-db
-df.to_sql(name='year', schema='01_src', con=engine, if_exists='append', index=False)
+df.to_sql(name='year', schema='raw', con=engine, if_exists='append', index=False)
 
 print(f"Loaded {len(years)} rows successfully!")

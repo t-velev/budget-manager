@@ -54,9 +54,9 @@ df = pd.DataFrame(db_subcategories_data)
 
 # During development, because Airflow comes with pandas v2.3, which doesn't support to_sql(if_exists='delete_rows')
 with engine.begin() as conn: 
-  conn.execute(text('DELETE FROM "01_src"."subcategory"'))
+  conn.execute(text('DELETE FROM "raw"."subcategory"'))
 
 # Load extracted data to the postgres budget-db
-df.to_sql(name='subcategory', schema='01_src', con=engine, if_exists='append', index=False)
+df.to_sql(name='subcategory', schema='raw', con=engine, if_exists='append', index=False)
 
 print(f"Loaded {len(subcategories)} rows successfully!")

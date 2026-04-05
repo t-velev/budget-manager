@@ -7,7 +7,7 @@ with
                       cast( m.created_time      as TIMESTAMP    )   as created_time     ,
                       cast( m.last_edited_time  as TIMESTAMP    )   as last_edited_time
                       ---
-               from   {{ source('01_src', 'month') }} m
+               from   {{ source('raw', 'month') }} m
              )
 
 --------------------------------------------------------------
