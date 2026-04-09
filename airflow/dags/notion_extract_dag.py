@@ -38,12 +38,7 @@ def extract_notion_db():
     def extract_db_years():
         return 'python /opt/airflow/src/extract_ntn_years.py'                             
 
-    extract_db_accounts()
-    extract_db_budgets()
-    extract_db_categories()
-    extract_db_inc_exp()
-    extract_db_months()
-    extract_db_subcategories()
-    extract_db_years()
+    extract_db_accounts() >> extract_db_categories() >> extract_db_subcategories() \
+    >> extract_db_years() >> extract_db_months() >> extract_db_budgets() >> extract_db_inc_exp()
 
 extract_notion_db()
