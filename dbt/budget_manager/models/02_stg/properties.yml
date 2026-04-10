@@ -52,6 +52,22 @@ models:
       # ---------------------
       - name: budget_name
       # ---------------------
+      - name: year_id
+        data_tests:
+          - not_null
+      # ---------------------
+      - name: month_id
+        data_tests:
+          - not_null
+      # ---------------------
+      - name: category_id
+        data_tests:
+          - not_null
+      # ---------------------
+      - name: subcategory_id
+        data_tests:
+          - not_null
+      # ---------------------
       - name: budget_amount
       # ---------------------
       - name: is_archived
@@ -170,6 +186,14 @@ models:
               arguments:
                 values: ['Приход', 'Разход', '-1']
       # ---------------------
+      - name: account_id
+        data_tests:
+          - not_null
+      # ---------------------
+      - name: category_id
+        data_tests:
+          - not_null
+      # ---------------------
       - name: priority
       # ---------------------
       - name: due_date
@@ -226,6 +250,26 @@ models:
           - not_null
       # ---------------------
       - name: note
+      # ---------------------
+      - name: year_id
+        data_tests:
+          - not_null
+      # ---------------------
+      - name: month_id
+        data_tests:
+          - not_null
+      # ---------------------
+      - name: account_id
+        data_tests:
+          - not_null
+      # ---------------------
+      - name: category_id
+        data_tests:
+          - not_null
+      # ---------------------
+      - name: subcategory_id
+        data_tests:
+          - not_null
       # ---------------------
       - name: created_time
         data_tests:
