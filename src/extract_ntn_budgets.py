@@ -43,7 +43,7 @@ for i, item in enumerate(budgets):
           'budget_amnt':       item['properties']['Бюджет']['number']                                                                                                       ,
           'year_id':           item['properties']['Година']['relation'][0]['id']                           if item['properties']['Година']['relation']            else None ,
           'month_id':          item['properties']['Месец']['relation'][0]['id']                            if item['properties']['Месец']['relation']             else None ,
-          'category_id':       item['properties']['Категория']['rollup']['array'][0]['relation'][0]['id']  if item['properties']['Категория']['rollup']['array']  else None ,
+        # 'category_id':       item['properties']['Категория']['rollup']['array'][0]['relation'][0]['id']  if item['properties']['Категория']['rollup']['array']  else None ,  # Notion's Lazy API can't fetch all rollup values
           'subcategory_id':    item['properties']['Подкатегория']['relation'][0]['id']                     if item['properties']['Подкатегория']['relation']      else None ,
           'is_archived':       item['properties']['Скрита']['checkbox']                                                                                                     ,
           'created_time':      item['created_time']                                                                                                                         ,

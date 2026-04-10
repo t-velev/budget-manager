@@ -5,6 +5,9 @@ with
                             cast( s.title             as VARCHAR(50)  )   as subcategory_name  ,
                             cast( s.type              as VARCHAR(20)  )   as subcategory_type  , -- [Приход, Разход]
                             ---
+                            cast( s.account_id        as VARCHAR(50)  )   as account_id        ,
+                            cast( s.category_id       as VARCHAR(50)  )   as category_id       ,
+                            ---
                             cast( s.flex_type         as VARCHAR(15)  )   as priority          , -- [Плаваща, Фиксирана, null]
                             cast( s.due_date          as DATE         )   as due_date          ,
                             ---
@@ -28,6 +31,8 @@ union all
 select '-1'                as subcategory_id_bk ,
        '-1'                as subcategory_name  ,
        '-1'                as subcategory_type  ,
+       '-1'                as account_id        ,
+       '-1'                as category_id       ,
        '-1'                as priority          ,
        null                as due_date          ,
        'false'             as is_archived       ,

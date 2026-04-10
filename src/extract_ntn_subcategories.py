@@ -41,6 +41,8 @@ for i, item in enumerate(subcategories):
           'id':                item['id']                                                                                                     ,
           'title':             item['properties']['Име']['title'][0]['plain_text']  if item['properties']['Име']['title']           else None ,
           'type':              item['properties']['Тип']['select']['name']          if item['properties']['Тип']['select']          else None ,
+          'account_id':        item['properties']['Сметка']['relation'][0]['id']    if item['properties']['Сметка']['relation']     else None ,
+          'category_id':       item['properties']['Категория']['relation'][0]['id'] if item['properties']['Категория']['relation']  else None ,
           'flex_type':         item['properties']['Необходимост']['select']['name'] if item['properties']['Необходимост']['select'] else None ,
           'due_date':          item['properties']['Падеж']['date']['start']         if item['properties']['Падеж']['date']          else None ,
           'is_archived':       item['properties']['Архивирай']['checkbox']                                                                    ,

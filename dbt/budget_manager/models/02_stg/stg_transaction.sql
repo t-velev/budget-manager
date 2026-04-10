@@ -14,14 +14,18 @@ with
                             ---
                             cast( t.year_id           as VARCHAR(100)  )  as year_id            ,
                             cast( t.month_id          as VARCHAR(100)  )  as month_id           ,
-                            cast( t.account_id        as VARCHAR(100)  )  as account_id         ,
-                            cast( t.category_id       as VARCHAR(100)  )  as category_id        ,
+                            ---
+                            cast( s.account_id        as VARCHAR(100)  )  as account_id         ,
+                            cast( s.category_id       as VARCHAR(100)  )  as category_id        ,
+                            ---
                             cast( t.subcategory_id    as VARCHAR(100)  )  as subcategory_id     ,
                             ---
                             cast( t.created_time      as TIMESTAMP     )  as created_time       ,
                             cast( t.last_edited_time  as TIMESTAMP     )  as last_edited_time
                             ---
                      from   {{ source('raw', 'transaction') }} t
+                            ---
+                            LEFT join {{ source('raw', 'subcategory') }} s on (s.id = t.subcategory_id)
                     )
 
 --------------------------------------------------------------
