@@ -2,7 +2,7 @@ x-py-scripts-template: &python-base
     build:
       context: .
       dockerfile: python/Dockerfile
-    image: python_src_base:latest  
+    image: python_src_base:latest
     profiles: ["manual"] # To not start with a general 'docker compose up'
     networks:
       - bm_network
@@ -13,54 +13,54 @@ x-py-scripts-template: &python-base
     environment:
       # --- NOTION CONFIG ---
       NOTION_API_KEY:             ${NOTION_API_KEY}
-      NOTION_DB_ID_YEARS:         ${NOTION_DB_ID_YEARS}
-      NOTION_DB_ID_MONTHS:        ${NOTION_DB_ID_MONTHS}
-      NOTION_DB_ID_CATEGORIES:    ${NOTION_DB_ID_CATEGORIES}
-      NOTION_DB_ID_SUBCATEGORIES: ${NOTION_DB_ID_SUBCATEGORIES}
-      NOTION_DB_ID_BUDGETS:       ${NOTION_DB_ID_BUDGETS}
-      NOTION_DB_ID_ACCOUNTS:      ${NOTION_DB_ID_ACCOUNTS}
-      NOTION_DB_ID_INC_EXP:       ${NOTION_DB_ID_INC_EXP}
+      NOTION_DB_ID_YEAR:          ${NOTION_DB_ID_YEAR}
+      NOTION_DB_ID_MONTH:         ${NOTION_DB_ID_MONTH}
+      NOTION_DB_ID_CATEGORY:      ${NOTION_DB_ID_CATEGORY}
+      NOTION_DB_ID_SUBCATEGORY:   ${NOTION_DB_ID_SUBCATEGORY}
+      NOTION_DB_ID_BUDGET:        ${NOTION_DB_ID_BUDGET}
+      NOTION_DB_ID_ACCOUNT:       ${NOTION_DB_ID_ACCOUNT}
+      NOTION_DB_ID_TRANSACTION:   ${NOTION_DB_ID_TRANSACTION}
       # --- DATABASE CONFIG ---
       POSTGRES_USER:              ${POSTGRES_USER}
       POSTGRES_PASSWORD:          ${POSTGRES_PASSWORD}
       POSTGRES_DB:                ${POSTGRES_DB}
     depends_on:
       budget-db:
-        condition: service_healthy 
+        condition: service_healthy
 
 x-dbt-common: &dbt-common
   build:
     context: .
     dockerfile: dbt/Dockerfile
-    target: dbt-postgres 
+    target: dbt-postgres
   image: dbt-postgres:latest
   environment:
     &dbt-common-env
-    DBT_PROFILES_DIR: /usr/app/dbt/budget_manager  # For dbt to store/look for profiles here     
-    DBT_PROJECT_DIR:  /usr/app/dbt/budget_manager  # For dbt to store/look for dbt_project.yml here     
-    user: "${UID:-1000}:${GID:-1000}" 
+    DBT_PROFILES_DIR: /usr/app/dbt/budget_manager  # For dbt to store/look for profiles here
+    DBT_PROJECT_DIR:  /usr/app/dbt/budget_manager  # For dbt to store/look for dbt_project.yml here
+    user: "${UID:-1000}:${GID:-1000}"
     # For DBT to see my project variables
     # --- NOTION CONFIG ---
     NOTION_API_KEY:             ${NOTION_API_KEY}
-    NOTION_DB_ID_YEARS:         ${NOTION_DB_ID_YEARS}
-    NOTION_DB_ID_MONTHS:        ${NOTION_DB_ID_MONTHS}
-    NOTION_DB_ID_CATEGORIES:    ${NOTION_DB_ID_CATEGORIES}
-    NOTION_DB_ID_SUBCATEGORIES: ${NOTION_DB_ID_SUBCATEGORIES}
-    NOTION_DB_ID_BUDGETS:       ${NOTION_DB_ID_BUDGETS}
-    NOTION_DB_ID_ACCOUNTS:      ${NOTION_DB_ID_ACCOUNTS}
-    NOTION_DB_ID_INC_EXP:       ${NOTION_DB_ID_INC_EXP}
+    NOTION_DB_ID_YEAR:          ${NOTION_DB_ID_YEAR}
+    NOTION_DB_ID_MONTH:         ${NOTION_DB_ID_MONTH}
+    NOTION_DB_ID_CATEGORY:      ${NOTION_DB_ID_CATEGORY}
+    NOTION_DB_ID_SUBCATEGORY:   ${NOTION_DB_ID_SUBCATEGORY}
+    NOTION_DB_ID_BUDGET:        ${NOTION_DB_ID_BUDGET}
+    NOTION_DB_ID_ACCOUNT:       ${NOTION_DB_ID_ACCOUNT}
+    NOTION_DB_ID_TRANSACTION:   ${NOTION_DB_ID_TRANSACTION}
     # --- DATABASE CONFIG ---
     POSTGRES_USER:              ${POSTGRES_USER}
     POSTGRES_PASSWORD:          ${POSTGRES_PASSWORD}
     POSTGRES_DB:                ${POSTGRES_DB}
     POSTGRES_HOST:              budget-db  # My existing budget manager DB container
   networks:
-    - bm_network    
+    - bm_network
   volumes:
     - ./dbt:/usr/app/dbt
   depends_on:
       budget-db:
-        condition: service_healthy 
+        condition: service_healthy
 
 x-airflow-common: &airflow-common
   build:
@@ -74,19 +74,19 @@ x-airflow-common: &airflow-common
     AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
     AIRFLOW__CORE__AUTH_MANAGER: airflow.providers.fab.auth_manager.fab_auth_manager.FabAuthManager
     AIRFLOW__CORE__EXECUTION_API_SERVER_URL: http://airflow-api-server:8080/execution/
-    AIRFLOW__CORE__INTERNAL_API_SECRET_KEY: b3c07359b1d86bf033b7c0a6d1db929b9654d7939d95db82438b196b6d8005cd     
-    AIRFLOW__API_AUTH__JWT_SECRET: 8a1f2b3c4d5e6f7a8b9c0d1e2f3a4b5c8a1f2b3c4d5e6f7a8b9c0d1e2f3a4b5c  
+    AIRFLOW__CORE__INTERNAL_API_SECRET_KEY: b3c07359b1d86bf033b7c0a6d1db929b9654d7939d95db82438b196b6d8005cd
+    AIRFLOW__API_AUTH__JWT_SECRET: 8a1f2b3c4d5e6f7a8b9c0d1e2f3a4b5c8a1f2b3c4d5e6f7a8b9c0d1e2f3a4b5c
 
     # For Airflow to see my project variables
     # --- NOTION CONFIG ---
     NOTION_API_KEY:             ${NOTION_API_KEY}
-    NOTION_DB_ID_YEARS:         ${NOTION_DB_ID_YEARS}
-    NOTION_DB_ID_MONTHS:        ${NOTION_DB_ID_MONTHS}
-    NOTION_DB_ID_CATEGORIES:    ${NOTION_DB_ID_CATEGORIES}
-    NOTION_DB_ID_SUBCATEGORIES: ${NOTION_DB_ID_SUBCATEGORIES}
-    NOTION_DB_ID_BUDGETS:       ${NOTION_DB_ID_BUDGETS}
-    NOTION_DB_ID_ACCOUNTS:      ${NOTION_DB_ID_ACCOUNTS}
-    NOTION_DB_ID_INC_EXP:       ${NOTION_DB_ID_INC_EXP}
+    NOTION_DB_ID_YEAR:          ${NOTION_DB_ID_YEAR}
+    NOTION_DB_ID_MONTH:         ${NOTION_DB_ID_MONTH}
+    NOTION_DB_ID_CATEGORY:      ${NOTION_DB_ID_CATEGORY}
+    NOTION_DB_ID_SUBCATEGORY:   ${NOTION_DB_ID_SUBCATEGORY}
+    NOTION_DB_ID_BUDGET:        ${NOTION_DB_ID_BUDGET}
+    NOTION_DB_ID_ACCOUNT:       ${NOTION_DB_ID_ACCOUNT}
+    NOTION_DB_ID_TRANSACTION:   ${NOTION_DB_ID_TRANSACTION}
     # --- DATABASE CONFIG ---
     POSTGRES_USER:              ${POSTGRES_USER}
     POSTGRES_PASSWORD:          ${POSTGRES_PASSWORD}
@@ -95,10 +95,10 @@ x-airflow-common: &airflow-common
   volumes:
     - ./airflow/dags:/opt/airflow/dags
     - ./airflow/logs:/opt/airflow/logs
-    - ./airflow/config:/opt/airflow/config    
+    - ./airflow/config:/opt/airflow/config
     - ./airflow/plugins:/opt/airflow/plugins
-    - ./src:/opt/airflow/src   
-    - ./data:/opt/airflow/data  
+    - ./src:/opt/airflow/src
+    - ./data:/opt/airflow/data
   user: "${AIRFLOW_UID:-50000}:0"
   networks:
     - bm_network
@@ -126,50 +126,50 @@ services:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
-      retries: 5   
+      retries: 5
 
 # --- PYTHON SERVICES ---
-  extract_ntn_years:
+  extract_ntn_year:
     <<: *python-base
-    command: python src/extract_ntn_years.py
-    container_name: extract_ntn_years
+    command: python src/extract_ntn_year.py
+    container_name: extract_ntn_year
 
-  extract_ntn_months:
+  extract_ntn_month:
     <<: *python-base
-    command: python src/extract_ntn_months.py
-    container_name: extract_ntn_months    
+    command: python src/extract_ntn_month.py
+    container_name: extract_ntn_month
 
-  extract_ntn_categories:
+  extract_ntn_category:
     <<: *python-base
-    command: python src/extract_ntn_categories.py
-    container_name: extract_ntn_categories   
+    command: python src/extract_ntn_category.py
+    container_name: extract_ntn_category
 
-  extract_ntn_subcategories:
+  extract_ntn_subcategory:
     <<: *python-base
-    command: python src/extract_ntn_subcategories.py
-    container_name: extract_ntn_subcategories         
+    command: python src/extract_ntn_subcategory.py
+    container_name: extract_ntn_subcategory
 
-  extract_ntn_budgets:
+  extract_ntn_budget:
     <<: *python-base
-    command: python src/extract_ntn_budgets.py
-    container_name: extract_ntn_budgets       
+    command: python src/extract_ntn_budget.py
+    container_name: extract_ntn_budget
 
-  extract_ntn_accounts:
+  extract_ntn_account:
     <<: *python-base
-    command: python src/extract_ntn_accounts.py
-    container_name: extract_ntn_accounts        
+    command: python src/extract_ntn_account.py
+    container_name: extract_ntn_account
 
-  extract_ntn_inc_exp:
+  extract_ntn_transaction:
     <<: *python-base
-    command: python src/extract_ntn_inc_exp.py
-    container_name: extract_ntn_inc_exp
+    command: python src/extract_ntn_transaction.py
+    container_name: extract_ntn_transaction
 
 # --- AIRFLOW SERVICES ---
   airflow-db:
     image: postgres:17-alpine
     container_name: airflow_postgres
     volumes:
-      - af_pg_storage:/var/lib/postgresql/data  
+      - af_pg_storage:/var/lib/postgresql/data
     networks:
       - bm_network
     environment:
@@ -189,11 +189,11 @@ services:
     ports:
       - "8081:8080"
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8080/api/v2/monitor/health"]      
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/api/v2/monitor/health"]
       interval: 30s
       timeout: 10s
       retries: 5
-    restart: always      
+    restart: always
 
   airflow-scheduler:
     <<: *airflow-common
@@ -204,7 +204,7 @@ services:
   airflow-dag-processor:
     <<: *airflow-common
     command: dag-processor
-    restart: always    
+    restart: always
 
   airflow-init:
     <<: *airflow-common
@@ -216,7 +216,7 @@ services:
       _AIRFLOW_WWW_USER_USERNAME: ${_AIRFLOW_WWW_USER_USERNAME:-airflow}
       _AIRFLOW_WWW_USER_PASSWORD: ${_AIRFLOW_WWW_USER_PASSWORD:-airflow}
       _PIP_ADDITIONAL_REQUIREMENTS: ''
-    user: "0:0"    
+    user: "0:0"
 
 # --- DBT SERVICES ---
   dbt:
@@ -239,4 +239,4 @@ networks:
 
 volumes:
   pg_storage:
-  af_pg_storage: 
+  af_pg_storage:

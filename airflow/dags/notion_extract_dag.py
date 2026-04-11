@@ -11,34 +11,34 @@ from datetime import datetime, timedelta
 def extract_notion_db():
 
     @task.bash
-    def extract_db_accounts():
-        return 'python /opt/airflow/src/extract_ntn_accounts.py'
+    def extract_db_account():
+        return 'python /opt/airflow/src/extract_ntn_account.py'
 
     @task.bash
-    def extract_db_budgets():
-        return 'python /opt/airflow/src/extract_ntn_budgets.py'      
+    def extract_db_budget():
+        return 'python /opt/airflow/src/extract_ntn_budget.py'      
     
     @task.bash
-    def extract_db_categories():
-        return 'python /opt/airflow/src/extract_ntn_categories.py'   
+    def extract_db_category():
+        return 'python /opt/airflow/src/extract_ntn_category.py'   
 
     @task.bash
-    def extract_db_inc_exp():
-        return 'python /opt/airflow/src/extract_ntn_inc_exp.py'   
+    def extract_db_transaction():
+        return 'python /opt/airflow/src/extract_ntn_transaction.py'   
 
     @task.bash
-    def extract_db_months():
-        return 'python /opt/airflow/src/extract_ntn_months.py'   
+    def extract_db_month():
+        return 'python /opt/airflow/src/extract_ntn_month.py'   
 
     @task.bash
-    def extract_db_subcategories():
-        return 'python /opt/airflow/src/extract_ntn_subcategories.py'   
+    def extract_db_subcategory():
+        return 'python /opt/airflow/src/extract_ntn_subcategory.py'   
 
     @task.bash
-    def extract_db_years():
-        return 'python /opt/airflow/src/extract_ntn_years.py'                             
+    def extract_db_year():
+        return 'python /opt/airflow/src/extract_ntn_year.py'                             
 
-    extract_db_accounts() >> extract_db_categories() >> extract_db_subcategories() \
-    >> extract_db_years() >> extract_db_months() >> extract_db_budgets() >> extract_db_inc_exp()
+    extract_db_account() >> extract_db_category() >> extract_db_subcategory() \
+    >> extract_db_year() >> extract_db_month() >> extract_db_budget() >> extract_db_transaction()
 
 extract_notion_db()
