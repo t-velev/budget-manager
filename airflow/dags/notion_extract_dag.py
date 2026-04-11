@@ -1,12 +1,18 @@
 from airflow.sdk import dag, task
 from datetime import datetime, timedelta
 
+default_args = {
+    'retries': 1,
+    'retry_delay': timedelta(seconds=10)
+}
+
 @dag(
     dag_id = 'extract_notion_db',
     description = 'Extract data from Notion databases',
     start_date = datetime(2026,3,9),
     schedule = None,
-    catchup = False
+    catchup = False,
+    default_args = default_args
 )
 def extract_notion_db():
 
