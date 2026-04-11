@@ -1,59 +1,106 @@
-###################################
+#######################################################
 ## 1. Import libraries
-###################################
+#######################################################
 
 import os
 import pandas as pd
-from ntn_utils import get_data
-from sqlalchemy import create_engine, text
+from ntn_utils import get_data, get_last_load_date, load_new_data, del_missing_data
+from sqlalchemy import create_engine
 
-###################################
+#######################################################
 ## 2. Set initial vars
-###################################
+#######################################################
 
-accounts_db_id = os.getenv('NOTION_DB_ID_ACCOUNTS')
+account_db_id = os.getenv('NOTION_DB_ID_ACCOUNT')
 postgres_db = os.getenv('POSTGRES_DB')
 db_user = os.getenv('POSTGRES_USER')
 db_pass = os.getenv('POSTGRES_PASSWORD')
 
-###################################
-## 4. Call function and load to db
-###################################
+pg_schema = 'raw'
+pg_table_name = 'account'
 
-# Call extract function
-accounts = get_data(accounts_db_id)
-
-# For testing purposes during development
-# with open('./data/notion_accounts_extract.json', 'r', encoding='utf-8') as file:
-#   accounts = json.load(file)
-
-print(f'Retrieved {len(accounts)} rows.') 
+#######################################################
+## 3. Load new data
+#######################################################
 
 # Set up connection to the budget-db
 engine = create_engine(f'postgresql://{db_user}:{db_pass}@budget-db:5432/{postgres_db}')
 
-# Extract and name only the needed columns
-db_accounts_data = []
+# Get the last load date from the database
+last_load_date = get_last_load_date(pg_schema, pg_table_name, engine)
 
-for i, item in enumerate(accounts):
-    db_accounts_data.append(
+print('Last load date = ', last_load_date)
+
+# Extract ONLY NEW data, no filters
+account_new_data = get_data(account_db_id, last_load_date, filter_cols=None)
+
+# For testing purposes during development
+# with open('./data/notion_account_extract.json', 'r', encoding='utf-8') as file:
+#   account_new_data = json.load(file)
+
+print(f'Retrieved {len(account_new_data)} new rows from Notion.')
+
+# Extract and name only the needed columns
+new_data = []
+
+for i, item in enumerate(account_new_data):
+    new_data.append(
          {
           'id':                item['id']                                                                                            ,
           'title':             item['properties']['Name']['title'][0]['plain_text'] if item['properties']['Name']['title'] else None ,
           'is_archived':       item['properties']['Архивирай']['checkbox']                                                           ,
           'created_time':      item['created_time']                                                                                  ,
-          'last_edited_time':  item['last_edited_time']                                                                                                                     
+          'last_edited_time':  item['last_edited_time']
           }
         )
 
 # Create pandas dataframe
-df = pd.DataFrame(db_accounts_data)
+new_data_df = pd.DataFrame(new_data)
 
-# During development, because Airflow comes with pandas v2.3, which doesn't support to_sql(if_exists='delete_rows')
-with engine.begin() as conn: 
-  conn.execute(text('DELETE FROM "raw"."account"'))
+# Load the new data and capture the result
+loaded_count = load_new_data(pg_schema, pg_table_name, new_data_df, engine)
 
-# Load extracted data to the postgres budget-db
-df.to_sql(name='account', schema='raw', con=engine, if_exists='append', index=False)
+print(f'Loaded {loaded_count} rows into {pg_schema}.{pg_table_name}!')
 
-print(f"Loaded {len(accounts)} rows successfully!")
+#######################################################
+## 4. Extract and load ids
+#######################################################
+
+# Extracting all the records in the table, but only one column,
+# so we can get the id (it's outside of the properties/columns list).
+# Then we use the the audit list of ids to find and delete the missing rows
+# in the raw schema's tables.
+
+filter_cols = ['Name']  # A list of notion db column names to be filtered. Empty list filters nothing.
+
+# Extract ALL data, filtered Name column
+filtered_data = get_data(account_db_id, last_load_date=None, filter_cols=filter_cols)
+
+# For testing purposes during development
+# with open('./data/notion_account_extract.json', 'r', encoding='utf-8') as file:
+#   account_new_data = json.load(file)
+
+print(f'Retrieved {len(filtered_data)} filtered rows from Notion.')
+
+filtered_data_df = []
+
+for i, item in enumerate(filtered_data):
+    filtered_data_df.append(
+         {
+          'id':          item['id']                                                                                            ,
+          'title':       item['properties']['Name']['title'][0]['plain_text'] if item['properties']['Name']['title'] else None ,
+          'source_name': pg_table_name
+          }
+        )
+
+#######################################################
+## 5. Delete missing data in the source from the target
+#######################################################
+
+# Create pandas dataframe
+filtered_df = pd.DataFrame(filtered_data_df)
+
+# Call delete function and capture the result
+deleted_count = del_missing_data(pg_schema, pg_table_name, filtered_df, engine)
+
+print(f'Deleted {deleted_count} rows from {pg_schema}.{pg_table_name}!')
