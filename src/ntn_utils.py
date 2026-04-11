@@ -89,14 +89,14 @@ def get_data(db_id: str, last_load_date: datetime, filter_cols: list) -> list[di
 
 def get_last_load_date(schema: str, table_name: str, engine) -> datetime:
     """
-    Extract the maximum value of column UPDATED_AT from budget_manager_dwh database.
+    Extract the maximum value of column LOAD_DATE from budget_manager_dwh database.
 
     Returns:
         datetime: A datetime/timestamp value.
     """
 
     # Get the last load date from the database
-    query = f'select max(loaded_at) from {schema}.{table_name}'
+    query = f'select max(load_date) from {schema}.{table_name}'
     df = pd.read_sql_query(query, engine)
 
     last_load_date = df.iloc[0].item()
