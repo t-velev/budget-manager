@@ -31,8 +31,10 @@ last_load_date = get_last_load_date(pg_schema, pg_table_name, engine)
 
 print('Last load date = ', last_load_date)
 
+new_data_filter = ['Име']  # A list of notion db column names to be filtered. Empty list filters nothing.
+
 # Extract ONLY NEW data, no filters
-year_new_data = get_data(year_db_id, last_load_date, filter_cols=None)
+year_new_data = get_data(year_db_id, last_load_date, filter_cols=new_data_filter)
 
 # For testing purposes during development
 # with open('./data/notion_year_extract.json', 'r', encoding='utf-8') as file:
@@ -70,10 +72,10 @@ print(f'Loaded {loaded_count} rows into {pg_schema}.{pg_table_name}!')
 # Then we use the the audit list of ids to find and delete the missing rows
 # in the raw schema's tables.
 
-filter_cols = ['Име']  # A list of notion db column names to be filtered. Empty list filters nothing.
+id_cols_filter = ['Име']  # A list of notion db column names to be filtered. Empty list filters nothing.
 
 # Extract ALL data, filtered Name column
-filtered_data = get_data(year_db_id, last_load_date=None, filter_cols=filter_cols)
+filtered_data = get_data(year_db_id, last_load_date=None, filter_cols=id_cols_filter)
 
 # For testing purposes during development
 # with open('./data/notion_year_extract.json', 'r', encoding='utf-8') as file:
