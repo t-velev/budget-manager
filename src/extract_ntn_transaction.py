@@ -31,7 +31,7 @@ last_load_date = get_last_load_date(pg_schema, pg_table_name, engine)
 
 print('Last load date = ', last_load_date)
 
-new_data_filter = ['Name', 'Тип', 'Дата', 'Сума', 'Статус', 'Бележка', 'Година', 'Месец', 'Подкатегория']  # A list of notion db column names to be filtered. Empty list filters nothing.
+new_data_filter = ['Name', 'Тип', 'Дата', 'Сума', 'Статус', 'Бележка', 'Година', 'Месец', 'Подкатегория', 'Template']  # A list of notion db column names to be filtered. Empty list filters nothing.
 
 # Extract ONLY NEW data, no filters
 transaction_new_data = get_data(transaction_db_id, last_load_date, filter_cols=new_data_filter)
@@ -60,6 +60,7 @@ for i, item in enumerate(transaction_new_data):
         # 'category_id':       item['properties']['Категория']['rollup']['array'][0]['relation'][0]['id']  if item['properties']['Категория']['rollup']['array']  else None ,  # Notion's Lazy API can't fetch all rollup values
           'subcategory_id':    item['properties']['Подкатегория']['relation'][0]['id']                     if item['properties']['Подкатегория']['relation']      else None ,
         # 'account_id':        item['properties']['Сметка']['rollup']['array'][0]['relation'][0]['id']     if item['properties']['Сметка']['rollup']['array']     else None ,  # Notion's Lazy API can't fetch all rollup values
+          'is_template':       item['properties']['Template']['checkbox']                                                                                                   ,
           'created_time':      item['created_time']                                                                                                                         ,
           'last_edited_time':  item['last_edited_time']
           }
