@@ -50,23 +50,48 @@ def get_data(db_id: str, last_load_date: datetime, filter_cols: list) -> list[di
     next_cursor = None
 
     # Loop through all pages
-    while has_more == True and len(all_data) < 50:  # Capped at 50 during development
+    while has_more == True: # and len(all_data) < 50:  # Capped at 50 during development
 
-        payload = {'page_size' : 50}                # Notion API request size limit = 100
+        payload = {'page_size' : 100}                # Notion API request size limit = 100
 
+        # Empty list to hold filters
+        filter_list = []
+
+        # Add incremental filter if it exists
         if last_load_date:
 
             last_load_date_local = last_load_date.replace(tzinfo=ZoneInfo("Europe/Sofia"))    # Add local timezone
             last_load_date_utc = last_load_date_local.astimezone(ZoneInfo("UTC"))             # Convert to UTC
             last_load_date_tz = last_load_date_utc.isoformat()                                # Convert to string so it can be used in the json payload
 
-            payload['filter'] = {'timestamp': 'last_edited_time',
-                                 'last_edited_time': {'after': last_load_date_tz}
-                                }
+            filter_list.append({'timestamp': 'last_edited_time',
+                                'last_edited_time': {'after': last_load_date_tz}
+                               })
 
+        # Extract transactions not used as template or with status Предстои.
+        # They have missing values and aren't used as a typical transaction.
+        if db_id == os.getenv('NOTION_DB_ID_TRANSACTION'):
+
+            filter_list.append({
+                                'and': [
+                                        {'property': 'Template' ,
+                                         'checkbox': {'does_not_equal': True} 
+                                        } ,
+                                        {'property': 'Статус' ,
+                                         'select'  : {'does_not_equal': 'Предстои'}
+                                        }
+                                       ]
+                                })
+            
+        # Finalize the filters payload
+        if filter_list:
+            payload['filter'] = {'and': filter_list}
+
+        # Set to continue with the next batch of records if there are such
         if next_cursor:
             payload['start_cursor'] = next_cursor
 
+        # Make an API post request
         response = requests.post(url, json=payload, headers=headers)
 
         data = response.json()
@@ -81,8 +106,8 @@ def get_data(db_id: str, last_load_date: datetime, filter_cols: list) -> list[di
         time.sleep(0.5)
 
     # Write the result as file - For dev phase
-    # with open('./data/notion_budgets_extract_all_data.json', 'w', encoding='utf-8') as file:
-    #     json.dump(all_data, file, ensure_ascii=False, indent=4)
+    # with open('./data/notion_transaction_full.json', 'w', encoding='utf-8') as file:
+    #     json.dump(all_data, file, ensure_ascii=False, indent=4)           
 
     return all_data
 
