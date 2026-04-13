@@ -34,11 +34,14 @@ x-dbt-common: &dbt-common
     dockerfile: dbt/Dockerfile
     target: dbt-postgres
   image: dbt-postgres:latest
+  user: "${UID:-1000}:0"
+  # Intercept the startup: set group-write permissions (umask 0002) then run dbt.
+  # Needed for Airflow to have write permissions to write to the target folder (and others created by dbt as well)
+  entrypoint: ["/bin/sh", "-c", "umask 0002 && exec dbt \"$$@\"", "--"]
   environment:
     &dbt-common-env
     DBT_PROFILES_DIR: /usr/app/dbt/budget_manager  # For dbt to store/look for profiles here
     DBT_PROJECT_DIR:  /usr/app/dbt/budget_manager  # For dbt to store/look for dbt_project.yml here
-    user: "${UID:-1000}:${GID:-1000}"
     # For DBT to see my project variables
     # --- NOTION CONFIG ---
     NOTION_API_KEY:             ${NOTION_API_KEY}
@@ -99,6 +102,7 @@ x-airflow-common: &airflow-common
     - ./airflow/plugins:/opt/airflow/plugins
     - ./src:/opt/airflow/src
     - ./data:/opt/airflow/data
+    - ./dbt:/opt/airflow/dbt    
   user: "${AIRFLOW_UID:-50000}:0"
   networks:
     - bm_network

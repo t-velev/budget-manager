@@ -42,9 +42,16 @@ def extract_notion_db():
 
     @task.bash
     def extract_db_year():
-        return 'python /opt/airflow/src/extract_ntn_year.py'                             
+        return 'python /opt/airflow/src/extract_ntn_year.py'    
+    
+    @task.bash
+    def dbt_build():
+        return "/opt/airflow/dbt_venv/bin/dbt build " \
+               "--project-dir /opt/airflow/dbt/budget_manager " \
+               "--profiles-dir /opt/airflow/dbt/budget_manager "
 
     extract_db_account() >> extract_db_category() >> extract_db_subcategory() \
-    >> extract_db_year() >> extract_db_month() >> extract_db_budget() >> extract_db_transaction()
+    >> extract_db_year() >> extract_db_month() >> extract_db_budget() >> extract_db_transaction() \
+    >> dbt_build()
 
 extract_notion_db()
