@@ -31,7 +31,7 @@ last_load_date = get_last_load_date(pg_schema, pg_table_name, engine)
 
 print('Last load date = ', last_load_date)
 
-new_data_filter = ['Name', 'Бюджет', 'Година', 'Месец', 'Подкатегория', 'Скрита']  # A list of notion db column names to be filtered. Empty list filters nothing.
+new_data_filter = ['Name', 'Край период', 'Бюджет', 'Година', 'Месец', 'Подкатегория', 'Скрита']  # A list of notion db column names to be filtered. Empty list filters nothing.
 
 # Extract ONLY NEW data, no filters
 budget_new_data = get_data(budget_db_id, last_load_date, filter_cols=new_data_filter)
@@ -50,7 +50,8 @@ for i, item in enumerate(budget_new_data):
          {
           'id':                item['id']                                                                                                                                   ,
           'title':             item['properties']['Name']['title'][0]['plain_text']                        if item['properties']['Name']['title']                 else None ,
-          'budget_amnt':       item['properties']['Бюджет']['number']                                                                                                       ,
+          'period_end':        item['properties']['Край период']['date']['start']                          if item['properties']['Край период']['date']           else None ,
+          'budget_amount':     item['properties']['Бюджет']['number']                                                                                                       ,
           'year_id':           item['properties']['Година']['relation'][0]['id']                           if item['properties']['Година']['relation']            else None ,
           'month_id':          item['properties']['Месец']['relation'][0]['id']                            if item['properties']['Месец']['relation']             else None ,
         # 'category_id':       item['properties']['Категория']['rollup']['array'][0]['relation'][0]['id']  if item['properties']['Категория']['rollup']['array']  else None ,  # Notion's Lazy API can't fetch all rollup values

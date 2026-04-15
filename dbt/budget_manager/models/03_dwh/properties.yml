@@ -80,3 +80,64 @@ models:
         data_type: varchar(100)
         data_tests:
           - not_null
+
+# ---------------------------------------
+# FACT_BUDGET
+# ---------------------------------------
+  - name: fact_budget
+    description: "Periodic snapshot table for the monthly budget by subcategory."
+    config:
+      materialized: table
+      unique_key: budget_id_bk
+      pre_hook:
+        - "{{ drop_pk() }}"
+        - "{{ drop_fk('category_dk') }}"
+        - "{{ drop_fk('month_dk') }}"
+        - "{{ drop_fk('subcategory_dk') }}"
+        - "{{ drop_fk('year_dk') }}"
+      post_hook:
+        - "{{ create_pk('budget_id_bk') }}"
+        - "{{ create_fk('category_dk', ref('dim_category'), 'dk') }}"
+        - "{{ create_fk('month_dk', ref('dim_month'), 'dk') }}"
+        - "{{ create_fk('subcategory_dk', ref('dim_subcategory'), 'dk') }}"
+        - "{{ create_fk('year_dk', ref('dim_year'), 'dk') }}"
+
+    columns:
+      # ---------------------
+      - name: budget_id_bk
+        data_type: varchar(100)
+        constraints:
+          - type: not_null
+        data_tests:
+          - not_null
+      # ---------------------
+      - name: budget_name
+        data_type: varchar(50)
+      # ---------------------
+      - name: period_end
+        data_type: date
+        data_tests:
+          - not_null        
+      # ---------------------      
+      - name: budget_amount
+        data_type: numeric(27,2)
+      # ---------------------
+      - name: category_dk
+        data_type: varchar(100)
+        data_tests:
+          - not_null
+      # ---------------------
+      - name: subcategory_dk
+        data_type: varchar(100)
+        data_tests:
+          - not_null
+      # ---------------------
+      - name: year_dk
+        data_type: varchar(100)
+        data_tests:
+          - not_null
+      # ---------------------
+      - name: month_dk
+        data_type: varchar(100)
+        data_tests:
+          - not_null          
