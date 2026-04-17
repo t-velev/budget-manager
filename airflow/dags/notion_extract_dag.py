@@ -48,7 +48,8 @@ def extract_notion_db():
     def dbt_build():
         return "/opt/airflow/dbt_venv/bin/dbt build " \
                "--project-dir /opt/airflow/dbt/budget_manager " \
-               "--profiles-dir /opt/airflow/dbt/budget_manager "
+               "--profiles-dir /opt/airflow/dbt/budget_manager " \
+               "--exclude resource_type:seed "
 
     extract_db_account() >> extract_db_category() >> extract_db_subcategory() \
     >> extract_db_year() >> extract_db_month() >> extract_db_budget() >> extract_db_transaction() \

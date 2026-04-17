@@ -1,0 +1,27 @@
+seeds:
+  - name: dim_date
+    description: 'Contains different attributes of pre-populated list of dates.'
+    config:
+      enabled: true
+      database: budget_manager_dwh
+      schema: warehouse
+      column_types:
+        dk:                             varchar(10)
+        date:                           date
+        full_date_description:          varchar(30)
+        day_of_week:                    varchar(9)
+        day_number_in_calendar_month:   numeric(2)
+        day_number_in_calendar_year:    numeric(3)
+        last_day_in_month_indicator:    varchar(3)
+        calendar_week_ending_date:      date
+        calendar_week_number_in_year:   numeric(2)
+        calendar_month_name:            varchar(9)
+        calendar_month_number_in_year:  varchar(12)
+        calendar_year-month:            varchar(7)
+        calendar_quarter:               varchar(2)
+        calendar_year-quarter:          varchar(7)
+        calendar_year:                  varchar(4)
+        holiday_indicator:              varchar(11)
+        weekday_indicator:              varchar(7)
+      post_hook:
+        - "{{ create_pk('dk') }}"

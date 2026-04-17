@@ -15,6 +15,7 @@ models:
         - "{{ drop_fk('month_dk') }}"
         - "{{ drop_fk('subcategory_dk') }}"
         - "{{ drop_fk('year_dk') }}"
+        - "{{ drop_fk('date_dk') }}"
       post_hook:
         - "{{ create_pk('transaction_id_bk') }}"
         - "{{ create_fk('account_dk', ref('dim_account'), 'dk') }}"
@@ -22,6 +23,7 @@ models:
         - "{{ create_fk('month_dk', ref('dim_month'), 'dk') }}"
         - "{{ create_fk('subcategory_dk', ref('dim_subcategory'), 'dk') }}"
         - "{{ create_fk('year_dk', ref('dim_year'), 'dk') }}"
+        - "{{ create_fk('date_dk', ref('dim_date'), 'dk') }}"
 
     columns:
       # ---------------------

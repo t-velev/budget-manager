@@ -101,7 +101,14 @@ with
                             dm.scd2_valid_to
                             ---
                      from   {{ ref('dim_month') }} dm
-                    )
+                    ) ,
+
+    DATE        as ( select
+                            dd.dk,
+                            dd.date
+                            ---
+                     from   {{ ref('dim_date') }} dd
+                    )                    
 
 --------------------------------------------------------------
 -- MAIN QRY
@@ -120,7 +127,8 @@ select t.transaction_id_bk    as transaction_id_bk  ,
        coalesce(c.dk, '-1')   as category_dk        ,
        coalesce(s.dk, '-1')   as subcategory_dk     ,
        coalesce(y.dk, '-1')   as year_dk            ,
-       coalesce(m.dk, '-1')   as month_dk
+       coalesce(m.dk, '-1')   as month_dk           ,
+       coalesce(d.dk, '-1')   as date_dk
        ---
        ---
 from   TRANSACTION t
@@ -149,3 +157,4 @@ from   TRANSACTION t
                                                m.scd2_valid_from   <= t.transaction_date and
                                                m.scd2_valid_to      > t.transaction_date
                                               )
+       LEFT join DATE        /* with */ d on ( d.date               = t.transaction_date )                                              
