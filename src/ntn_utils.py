@@ -52,7 +52,12 @@ def get_data(db_id: str, last_load_date: datetime, filter_cols: list) -> list[di
     # Loop through all pages
     while has_more == True: # and len(all_data) < 50:  # Capped at 50 during development
 
-        payload = {'page_size' : 100}                # Notion API request size limit = 100
+        # If it's the heavy subcategory table, only ask for 25 rows at a time to prevent Notion 504 timeouts.
+        # Otherwise, use the max 100.
+        if db_id == os.getenv('NOTION_DB_ID_SUBCATEGORY'):
+            payload = {'page_size': 25}
+        else:
+            payload = {'page_size': 100}      # Notion API request size limit = 100
 
         # Empty list to hold filters
         filter_list = []
@@ -92,7 +97,7 @@ def get_data(db_id: str, last_load_date: datetime, filter_cols: list) -> list[di
             payload['start_cursor'] = next_cursor
 
         # Make an API post request
-        response = requests.post(url, json=payload, headers=headers)
+        response = requests.post(url, json=payload, headers=headers, timeout=90)
 
         data = response.json()
 
