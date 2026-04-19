@@ -13,7 +13,8 @@ engine = create_engine(f'postgresql://{db_user}:{db_pass}@budget-db:5432/{postgr
 
 default_args = {
     'retries': 1,
-    'retry_delay': pendulum.duration(seconds=10)
+    'retry_delay': pendulum.duration(seconds=10),
+    'trigger_rule': 'none_failed'
 }
 
 @dag(
@@ -24,29 +25,48 @@ default_args = {
     catchup = False,
     default_args = default_args,
     params={
-        'Force run all tasks': Param(False, type="boolean")
+        'Force tasks to run': Param(False, type="boolean"),
+        'Select tasks to run': Param(['extract_db_account', 'extract_db_category', 'extract_db_subcategory', 'extract_db_year', 
+                                      'extract_db_month'  , 'extract_db_budget'  , 'extract_db_transaction', 'dbt_build'], type="array",
+                                       #########
+                                       examples=['extract_db_account', 'extract_db_category', 'extract_db_subcategory', 'extract_db_year', 
+                                                 'extract_db_month'  , 'extract_db_budget'  , 'extract_db_transaction', 'dbt_build'])
     }    
 )
 def extract_notion_db():
 
     def has_to_start(context):
 
+        # Extract task name/id from context
+        ti = context.get('task_instance')
+        task_name = ti.task_id
+
         # Extract params from context
         params = context.get('params', {})
-        force_all_tasks = params.get('Force run all tasks', False)
+        force_tasks = params.get('Force tasks to run', False)
+        tasks_to_run = params.get('Select tasks to run', [])
 
         # Calc time since last successful run
         prev_run_time = context.get('prev_start_date_success')
         current_time = pendulum.now()
         time_since_last_run = current_time - prev_run_time
 
-        # Don't run the dag if last successful run was less than 15 mins ago or it isn't manually forced
-        if time_since_last_run < pendulum.duration(minutes=60) and force_all_tasks == False:
+        # Don't run the task if last successful run was less than 15 mins ago or it isn't manually forced
+        if time_since_last_run < pendulum.duration(minutes=15) and force_tasks == False:
             print(f'Last successful run was before: {time_since_last_run.in_words()}')
-            print(f'Skipping task run...')
+            print(f'Skipping {task_name}...')
             return False
+
+        # The task has to be selected to run, no matter if it's forced or not
+        elif task_name not in tasks_to_run:
+            print(f'Skipping {task_name} because it isn\'t selected.')
+            return False            
+
+        # Run the task if it is selected and enough time has passed
         else:
+            print(f'Running {task_name}...')
             return True
+
 
     def write_to_db_log(context):
 
