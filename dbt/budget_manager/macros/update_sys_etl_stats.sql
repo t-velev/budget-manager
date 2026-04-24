@@ -17,7 +17,7 @@
                                                      and {{ dbt.current_timestamp() }} )
            --- 
     where  run_id = '{{ var("run_id", 99999999999999) }}'
-    and    task_name = 'extract_db_{{ src_name_split }}'
+    and    task_name = 'extract_and_load_{{ src_name_split }}'
 
 
 {% endset %}
@@ -60,7 +60,7 @@
     set    wh_closed  = ( select count(*) from deleted_rows )
            --- 
     where  run_id = '{{ var("run_id", 99999999999999) }}'
-    and    task_name = 'extract_db_{{ src_name_split }}'
+    and    task_name = 'extract_and_load_{{ src_name_split }}'
 
 {% endset %}
 

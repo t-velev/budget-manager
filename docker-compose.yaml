@@ -133,40 +133,40 @@ services:
       retries: 5
 
 # --- PYTHON SERVICES ---
-  extract_ntn_year:
+  extract_and_load_year:
     <<: *python-base
-    command: python src/extract_ntn_year.py
-    container_name: extract_ntn_year
+    command: python src/extract_and_load_year.py
+    container_name: extract_and_load_year
 
-  extract_ntn_month:
+  extract_and_load_month:
     <<: *python-base
-    command: python src/extract_ntn_month.py
-    container_name: extract_ntn_month
+    command: python src/extract_and_load_month.py
+    container_name: extract_and_load_month
 
-  extract_ntn_category:
+  extract_and_load_category:
     <<: *python-base
-    command: python src/extract_ntn_category.py
-    container_name: extract_ntn_category
+    command: python src/extract_and_load_category.py
+    container_name: extract_and_load_category
 
-  extract_ntn_subcategory:
+  extract_and_load_subcategory:
     <<: *python-base
-    command: python src/extract_ntn_subcategory.py
-    container_name: extract_ntn_subcategory
+    command: python src/extract_and_load_subcategory.py
+    container_name: extract_and_load_subcategory
 
-  extract_ntn_budget:
+  extract_and_load_budget:
     <<: *python-base
-    command: python src/extract_ntn_budget.py
-    container_name: extract_ntn_budget
+    command: python src/extract_and_load_budget.py
+    container_name: extract_and_load_budget
 
-  extract_ntn_account:
+  extract_and_load_account:
     <<: *python-base
-    command: python src/extract_ntn_account.py
-    container_name: extract_ntn_account
+    command: python src/extract_and_load_account.py
+    container_name: extract_and_load_account
 
-  extract_ntn_transaction:
+  extract_and_load_transaction:
     <<: *python-base
-    command: python src/extract_ntn_transaction.py
-    container_name: extract_ntn_transaction
+    command: python src/extract_and_load_transaction.py
+    container_name: extract_and_load_transaction
 
 # --- AIRFLOW SERVICES ---
   airflow-db:

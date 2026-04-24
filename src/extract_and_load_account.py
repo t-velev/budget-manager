@@ -18,8 +18,8 @@ db_user = os.getenv('POSTGRES_USER')
 db_pass = os.getenv('POSTGRES_PASSWORD')
 
 run_date = pendulum.now('Europe/Sofia')
-dag_name = os.getenv('dag_name', 'extract_notion_db')
-task_name = os.getenv('task_name', 'extract_db_account')
+dag_name = os.getenv('dag_name', 'notion_to_dwh_main_pipeline')
+task_name = os.getenv('task_name', 'extract_and_load_account')
 run_id = os.getenv('run_id', 99999999999999)  # 99999999999999 as a backup when run manually through docker
 
 pg_schema = 'raw'
