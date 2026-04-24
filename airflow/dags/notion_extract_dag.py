@@ -12,8 +12,8 @@ log_table_name = 'sys_etl_dag_task_log'
 engine = create_engine(f'postgresql://{db_user}:{db_pass}@budget-db:5432/{postgres_db}')
 
 default_args = {
-    'retries': 1,
-    'retry_delay': pendulum.duration(seconds=10),
+    # 'retries': 1,
+    # 'retry_delay': pendulum.duration(seconds=10),
     'trigger_rule': 'none_failed'
 }
 
@@ -103,43 +103,85 @@ def extract_notion_db():
     @task.bash(on_success_callback=write_to_db_log, 
                on_failure_callback=write_to_db_log)
     def extract_db_account():
-        return 'python /opt/airflow/src/extract_ntn_account.py'
+        # Inject the run_id directly into the bash execution environment
+        return """
+               run_id={{ logical_date.in_timezone('Europe/Sofia').format('YYYYMMDDHHmmss') }} \
+               dag_name={{ dag.dag_id }} \
+               task_name={{ task.task_id }} \
+               python /opt/airflow/src/extract_ntn_account.py
+               """        
 
     @task.run_if(has_to_start)
     @task.bash(on_success_callback=write_to_db_log, 
                on_failure_callback=write_to_db_log)
     def extract_db_budget():
-        return 'python /opt/airflow/src/extract_ntn_budget.py'
+        # Inject the run_id directly into the bash execution environment
+        return """
+               run_id={{ logical_date.in_timezone('Europe/Sofia').format('YYYYMMDDHHmmss') }} \
+               dag_name={{ dag.dag_id }} \
+               task_name={{ task.task_id }} \
+               python /opt/airflow/src/extract_ntn_budget.py
+               """        
 
     @task.run_if(has_to_start)
     @task.bash(on_success_callback=write_to_db_log, 
                on_failure_callback=write_to_db_log)
     def extract_db_category():
-        return 'python /opt/airflow/src/extract_ntn_category.py'
+        # Inject the run_id directly into the bash execution environment
+        return """
+               run_id={{ logical_date.in_timezone('Europe/Sofia').format('YYYYMMDDHHmmss') }} \
+               dag_name={{ dag.dag_id }} \
+               task_name={{ task.task_id }} \
+               python /opt/airflow/src/extract_ntn_category.py
+               """        
 
     @task.run_if(has_to_start)
     @task.bash(on_success_callback=write_to_db_log, 
                on_failure_callback=write_to_db_log)
     def extract_db_transaction():
-        return 'python /opt/airflow/src/extract_ntn_transaction.py'
+        # Inject the run_id directly into the bash execution environment
+        return """
+               run_id={{ logical_date.in_timezone('Europe/Sofia').format('YYYYMMDDHHmmss') }} \
+               dag_name={{ dag.dag_id }} \
+               task_name={{ task.task_id }} \
+               python /opt/airflow/src/extract_ntn_transaction.py
+               """        
 
     @task.run_if(has_to_start)
     @task.bash(on_success_callback=write_to_db_log, 
                on_failure_callback=write_to_db_log)
     def extract_db_month():
-        return 'python /opt/airflow/src/extract_ntn_month.py'
+        # Inject the run_id directly into the bash execution environment
+        return """
+               run_id={{ logical_date.in_timezone('Europe/Sofia').format('YYYYMMDDHHmmss') }} \
+               dag_name={{ dag.dag_id }} \
+               task_name={{ task.task_id }} \
+               python /opt/airflow/src/extract_ntn_month.py
+               """        
 
     @task.run_if(has_to_start)
     @task.bash(on_success_callback=write_to_db_log, 
                on_failure_callback=write_to_db_log)
     def extract_db_subcategory():
-        return 'python /opt/airflow/src/extract_ntn_subcategory.py'
+        # Inject the run_id directly into the bash execution environment
+        return """
+               run_id={{ logical_date.in_timezone('Europe/Sofia').format('YYYYMMDDHHmmss') }} \
+               dag_name={{ dag.dag_id }} \
+               task_name={{ task.task_id }} \
+               python /opt/airflow/src/extract_ntn_subcategory.py
+               """        
 
     @task.run_if(has_to_start)
     @task.bash(on_success_callback=write_to_db_log, 
                on_failure_callback=write_to_db_log)
     def extract_db_year():
-        return 'python /opt/airflow/src/extract_ntn_year.py'
+        # Inject the run_id directly into the bash execution environment
+        return """
+               run_id={{ logical_date.in_timezone('Europe/Sofia').format('YYYYMMDDHHmmss') }} \
+               dag_name={{ dag.dag_id }} \
+               task_name={{ task.task_id }} \
+               python /opt/airflow/src/extract_ntn_year.py
+               """
 
     @task.run_if(has_to_start)
     @task.bash(on_success_callback=write_to_db_log, 
@@ -148,7 +190,8 @@ def extract_notion_db():
         return "/opt/airflow/dbt_venv/bin/dbt build " \
                "--project-dir /opt/airflow/dbt/budget_manager " \
                "--profiles-dir /opt/airflow/dbt/budget_manager " \
-               "--exclude resource_type:seed "
+               "--exclude resource_type:seed " \
+               "--vars '{\"run_id\": \"{{ logical_date.in_timezone('Europe/Sofia').format('YYYYMMDDHHmmss') }}\"}'"
 
     extract_db_account() >> extract_db_category() >> extract_db_subcategory() \
     >> extract_db_year() >> extract_db_month() >> extract_db_budget() >> extract_db_transaction() \

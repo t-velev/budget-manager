@@ -3,7 +3,7 @@ import json
 import os
 import time
 import pandas as pd
-from sqlalchemy import text
+from sqlalchemy import Table, Column, Integer, String, Date, MetaData, select, insert, update, text
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
@@ -155,8 +155,10 @@ def load_new_data(schema_name: str, table_name: str, new_data_df, engine):
 
             # Load extracted data to the postgres budget-db
             result = new_data_df.to_sql(name=table_name, con=conn, schema=schema_name, if_exists='append', index=False, method='multi', chunksize=1000)
+        else:
+            result = 0
 
-            return result
+        return result
 
 
 def del_missing_data(schema_name: str, table_name: str, filtered_df, engine) -> int:
@@ -186,3 +188,54 @@ def del_missing_data(schema_name: str, table_name: str, filtered_df, engine) -> 
         result = conn.execute(query)
 
         return result.rowcount # Return how many rows were actually deleted
+    
+
+def upsert_into_stats(engine, row_count, run_id, run_date, dag_name, task_name, column):
+
+    metadata = MetaData()
+
+    # Define table object
+    stats_table = Table(
+        "sys_etl_stats",
+        metadata,
+        Column("run_id"        , Integer),
+        Column("run_date"      , Date   ),
+        Column("dag_name"      , String ),
+        Column("task_name"     , String ),
+        Column("ntn_extracted" , Integer),
+        Column("raw_loaded"    , Integer),
+        Column("raw_deleted"   , Integer),
+        Column("wh_loaded"     , Integer),
+        Column("wh_closed"     , Integer),
+        schema="warehouse"
+    )
+
+    with engine.connect() as conn:
+
+        select_stmt = select(stats_table).where( stats_table.c.run_id == run_id,
+                                                 stats_table.c.dag_name == dag_name,
+                                                 stats_table.c.task_name == task_name
+                                                )
+        select_result = conn.execute(select_stmt).fetchone()
+
+        if not select_result:
+            insert_stmt = ( insert(stats_table)
+                           .values({ stats_table.c.run_id:    run_id,
+                                     stats_table.c.run_date:  run_date,
+                                     stats_table.c.dag_name:  dag_name,
+                                     stats_table.c.task_name: task_name,
+                                     stats_table.c[column]:   row_count
+                                   })
+                          )
+            insert_result = conn.execute(insert_stmt)
+            conn.commit()    
+        else:
+            update_stmt = ( update(stats_table)
+                           .where(stats_table.c.run_id    == run_id,
+                                  stats_table.c.run_date  == run_date,
+                                  stats_table.c.dag_name  == dag_name,
+                                  stats_table.c.task_name == task_name)
+                           .values({ stats_table.c[column]: row_count })
+                          )
+            update_result = conn.execute(update_stmt)
+            conn.commit()

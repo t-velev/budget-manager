@@ -102,7 +102,7 @@ models:
         - "{{ create_fk('category_dk', ref('dim_category'), 'dk') }}"
         - "{{ create_fk('month_dk', ref('dim_month'), 'dk') }}"
         - "{{ create_fk('subcategory_dk', ref('dim_subcategory'), 'dk') }}"
-        - "{{ create_fk('year_dk', ref('dim_year'), 'dk') }}"
+        - "{{ create_fk('year_dk', ref('dim_year'), 'dk') }}"    
 
     columns:
       # ---------------------

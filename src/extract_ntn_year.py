@@ -3,8 +3,9 @@
 #######################################################
 
 import os
+import pendulum
 import pandas as pd
-from ntn_utils import get_data, get_last_load_date, load_new_data, del_missing_data
+from ntn_utils import get_data, get_last_load_date, load_new_data, del_missing_data, upsert_into_stats
 from sqlalchemy import create_engine
 
 #######################################################
@@ -15,6 +16,11 @@ year_db_id = os.getenv('NOTION_DB_ID_YEAR')
 postgres_db = os.getenv('POSTGRES_DB')
 db_user = os.getenv('POSTGRES_USER')
 db_pass = os.getenv('POSTGRES_PASSWORD')
+
+run_date = pendulum.now('Europe/Sofia')
+dag_name = os.getenv('dag_name', 'extract_notion_db')
+task_name = os.getenv('task_name', 'extract_db_year')
+run_id = os.getenv('run_id', 99999999999999)  # 99999999999999 as a backup when run manually through docker
 
 pg_schema = 'raw'
 pg_table_name = 'year'
@@ -40,7 +46,10 @@ year_new_data = get_data(year_db_id, last_load_date, filter_cols=new_data_filter
 # with open('./data/notion_year_extract.json', 'r', encoding='utf-8') as file:
 #   year_new_data = json.load(file)
 
-print(f'Retrieved {len(year_new_data)} new rows from Notion.')
+print(f'Extracted {len(year_new_data)} new rows from Notion.')
+
+# Write the extracted count to sys_etl_stats table
+upsert_into_stats(engine, len(year_new_data), run_id, run_date, dag_name, task_name, column='ntn_extracted')
 
 # Extract and name only the needed columns
 new_data = []
@@ -63,6 +72,9 @@ loaded_count = load_new_data(pg_schema, pg_table_name, new_data_df, engine)
 
 print(f'Loaded {loaded_count} rows into {pg_schema}.{pg_table_name}!')
 
+# Write the loaded count to sys_etl_stats table
+upsert_into_stats(engine, loaded_count, run_id, run_date, dag_name, task_name, column='raw_loaded')
+
 #######################################################
 ## 4. Extract and load ids
 #######################################################
@@ -81,7 +93,7 @@ filtered_data = get_data(year_db_id, last_load_date=None, filter_cols=id_cols_fi
 # with open('./data/notion_year_extract.json', 'r', encoding='utf-8') as file:
 #   year_new_data = json.load(file)
 
-print(f'Retrieved {len(filtered_data)} filtered rows from Notion.')
+print(f'Extracted {len(filtered_data)} filtered rows from Notion.')
 
 filtered_data_df = []
 
@@ -105,3 +117,6 @@ filtered_df = pd.DataFrame(filtered_data_df)
 deleted_count = del_missing_data(pg_schema, pg_table_name, filtered_df, engine)
 
 print(f'Deleted {deleted_count} rows from {pg_schema}.{pg_table_name}!')
+
+# Write the deleted count to sys_etl_stats table
+upsert_into_stats(engine, deleted_count, run_id, run_date, dag_name, task_name, column='raw_deleted')

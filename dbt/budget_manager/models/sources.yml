@@ -10,3 +10,4 @@ sources:
       - name: subcategory
       - name: transaction
       - name: year
+      - name: notion_ids_audit

@@ -1,0 +1,23 @@
+snapshots:
+  - name: fact_budget_audit_log
+    relation: ref('stg_budget')
+    config:
+      schema: warehouse
+      unique_key: budget_id_bk
+      check_cols:
+        - budget_id_bk
+        - budget_name
+        - period_end
+        - year_id
+        - month_id
+        - category_id
+        - subcategory_id
+        - budget_amount
+        - is_archived
+      pre_hook:
+        - "{{ drop_pk() }}"
+      post_hook:
+        - "{{ create_pk('dk') }}"
+        # Insert new and deleted count into sys_etl_stats
+        - "{{ insert_new_into_stats('warehouse', 'fact_budget_audit_log', 'sys_etl_stats')}}"
+        - "{{ insert_deleted_into_stats('warehouse', 'fact_budget_audit_log', 'sys_etl_stats')}}"

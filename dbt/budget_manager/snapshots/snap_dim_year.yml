@@ -20,3 +20,7 @@ snapshots:
         - "{{ apply_not_null('year_name') }}"
         - "{{ apply_not_null('created_time') }}"
         - "{{ apply_not_null('last_edited_time') }}"
+
+        # Insert new and deleted count into sys_etl_stats
+        - "{{ insert_new_into_stats('warehouse', 'dim_year', 'sys_etl_stats')}}"
+        - "{{ insert_deleted_into_stats('warehouse', 'dim_year', 'sys_etl_stats')}}"

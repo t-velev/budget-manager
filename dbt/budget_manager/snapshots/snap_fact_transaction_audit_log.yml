@@ -1,5 +1,5 @@
 snapshots:
-  - name: transaction_audit_log
+  - name: fact_transaction_audit_log
     relation: ref('stg_transaction')
     config:
       schema: warehouse
@@ -19,4 +19,7 @@ snapshots:
       pre_hook:
         - "{{ drop_pk() }}"
       post_hook:
-        - "{{ create_pk('dk') }}"        
+        - "{{ create_pk('dk') }}"
+        # Insert new and deleted count into sys_etl_stats
+        - "{{ insert_new_into_stats('warehouse', 'fact_transaction_audit_log', 'sys_etl_stats')}}"
+        - "{{ insert_deleted_into_stats('warehouse', 'fact_transaction_audit_log', 'sys_etl_stats')}}"
