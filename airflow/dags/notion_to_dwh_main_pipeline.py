@@ -47,7 +47,7 @@ def notion_to_dwh_main_pipeline():
         tasks_to_run = params.get('Select tasks to run', [])
 
         # Calc time since last successful run
-        prev_run_time = context.get('prev_start_date_success')
+        prev_run_time = context.get('prev_start_date_success') or pendulum.datetime(1990, 1, 1)  # For situations when the dag is executed for the first time
         current_time = pendulum.now()
         time_since_last_run = current_time - prev_run_time
 
