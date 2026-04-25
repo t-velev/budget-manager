@@ -11,3 +11,6 @@ airflow/config/
 airflow/airflow.db
 airflow/webserver_config.py
 airflow/standalone_admin_password.txt
+
+# --- DBT ---
+.user.yml
