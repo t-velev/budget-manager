@@ -42,10 +42,6 @@ new_data_filter = ['Name', 'Тип', 'Дата', 'Сума', 'Статус', 'Б
 # Extract ONLY NEW data, no filters
 transaction_new_data = get_data(transaction_db_id, last_load_date, filter_cols=new_data_filter)
 
-# For testing purposes during development
-# with open('./data/notion_transaction_extract.json', 'r', encoding='utf-8') as file:
-#   transaction_new_data = json.load(file)
-
 print(f'Extracted {len(transaction_new_data)} new rows from Notion.')
 
 # Write the extracted count to sys_etl_stats table
@@ -99,10 +95,6 @@ id_cols_filter = ['Name']  # A list of notion db column names to be filtered. Em
 
 # Extract ALL data, filtered Name column
 filtered_data = get_data(transaction_db_id, last_load_date=None, filter_cols=id_cols_filter)
-
-# For testing purposes during development
-# with open('./data/notion_transaction_extract.json', 'r', encoding='utf-8') as file:
-#   transaction_new_data = json.load(file)
 
 print(f'Extracted {len(filtered_data)} filtered rows from Notion.')
 

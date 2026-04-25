@@ -7,19 +7,25 @@ from sqlalchemy import Table, Column, Integer, String, Date, MetaData, select, i
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
-api_key = os.getenv('NOTION_API_KEY')
 
 def get_data(db_id: str, last_load_date: datetime, filter_cols: list) -> list[dict]:
     """
-    Extract data from specific database in Notion.
+    Extract data from specific Notion database.
 
     Since Notion API has request size limit of 100 rows,
     the function uses pagination variables to make multiple
-    API calls untill all the data is extracted.
+    API calls untill all data is extracted.
+
+    Args:
+        db_id (str): The Notion database id, from which data will be extracted.
+        last_load_date (datetime): The date and the time when the last data load was done.
+        filter_cols (list): A list of column names to be filtered and extracted from the Notion database.
 
     Returns:
         list[dict]: A list with all rows in dictionary form.
     """
+
+    api_key = os.getenv('NOTION_API_KEY')
 
     headers = {
         'Authorization' : 'Bearer ' + api_key,
@@ -27,20 +33,17 @@ def get_data(db_id: str, last_load_date: datetime, filter_cols: list) -> list[di
         'Notion-Version' : '2022-06-28'
         }
 
+    # Building a string of filters (with column names) to be added to the url
     filter_string = ''
 
     if filter_cols:
-
-        # Building a string of filters to be added to url
         for col in filter_cols:
-
             if col == filter_cols[0]:
                 filter_string = '?filter_properties[]=' + col
             else:
                 filter_string = filter_string + '&filter_properties[]=' + col
 
         url = f'https://api.notion.com/v1/databases/{db_id}/query' + filter_string
-
     else:
         url = f'https://api.notion.com/v1/databases/{db_id}/query'
 
@@ -80,14 +83,14 @@ def get_data(db_id: str, last_load_date: datetime, filter_cols: list) -> list[di
             filter_list.append({
                                 'and': [
                                         {'property': 'Template' ,
-                                         'checkbox': {'does_not_equal': True} 
+                                         'checkbox': {'does_not_equal': True}
                                         } ,
                                         {'property': 'Статус' ,
                                          'select'  : {'does_not_equal': 'Предстои'}
                                         }
                                        ]
                                 })
-            
+
         # Finalize the filters payload
         if filter_list:
             payload['filter'] = {'and': filter_list}
@@ -110,23 +113,24 @@ def get_data(db_id: str, last_load_date: datetime, filter_cols: list) -> list[di
         # Pause to not overload the API (Rate limit = 3 req/sec)
         time.sleep(0.5)
 
-    # Write the result as file - For dev phase
-    # with open('./data/notion_transaction_full.json', 'w', encoding='utf-8') as file:
-    #     json.dump(all_data, file, ensure_ascii=False, indent=4)           
-
     return all_data
 
 
-def get_last_load_date(schema: str, table_name: str, engine) -> datetime:
+def get_last_load_date(schema_name: str, table_name: str, engine) -> datetime:
     """
     Extract the maximum value of column LOAD_DATE from budget_manager_dwh database.
 
+    Args:
+        schema_name (str): The name of the target schema for the data load.
+        table_name (str): The name of the target table for the data load.
+        engine: The database connection object.
+
     Returns:
-        datetime: A datetime/timestamp value.
+        datetime: The date and the time when the last data load was done.
     """
 
     # Get the last load date from the database
-    query = f'select max(load_date) from {schema}.{table_name}'
+    query = f'select max(load_date) from {schema_name}.{table_name}'
     df = pd.read_sql_query(query, engine)
 
     last_load_date = df.iloc[0].item()
@@ -134,11 +138,18 @@ def get_last_load_date(schema: str, table_name: str, engine) -> datetime:
     return last_load_date
 
 
-def load_new_data(schema_name: str, table_name: str, new_data_df, engine):
+def load_new_data(schema_name: str, table_name: str, new_data_df, engine) -> int:
     """
-    Load data into a selected budget_manager_dwh database table.
+    Load new/incremental data into a budget_manager_dwh database table.
+
+    Args:
+        schema_name (str): The name of the target schema for the data load.
+        table_name (str): The name of the target table for the data load.
+        new_data_df (df): Dataframe of the new data that will be loaded.
+        engine: The database connection object.
 
     Returns:
+        int: The number of rows affected.
     """
 
     with engine.begin() as conn:
@@ -170,8 +181,14 @@ def del_missing_data(schema_name: str, table_name: str, filtered_df, engine) -> 
 
     Intentionally done in two separate db transactions.
 
+    Args:
+        schema_name (str): The name of the target schema for the data load.
+        table_name (str): The name of the target table for the data load.
+        filtered_df (df): Dataframe of the filtered data that will be loaded.
+        engine: The database connection object.
+
     Returns:
-        int: Return how many rows were actually deleted.
+        int: How many rows were actually deleted.
     """
 
     with engine.begin() as conn:
@@ -188,9 +205,26 @@ def del_missing_data(schema_name: str, table_name: str, filtered_df, engine) -> 
         result = conn.execute(query)
 
         return result.rowcount # Return how many rows were actually deleted
-    
 
-def upsert_into_stats(engine, row_count, run_id, run_date, dag_name, task_name, column):
+
+def upsert_into_stats(engine, row_count: int, run_id: int, run_date: datetime, dag_name: str, task_name: str, column: str) -> None:
+    """
+    Insert or update the values in the sys_etl_stats log table for the current dag run.
+
+    Check if a row exists for the current run_id. If not, create one. Else, update values.
+
+    Args:
+        engine: The database connection object.
+        row_count (int): The number of rows that are extracted from Notion through get_new_data().
+        run_id (int): The current dag run's id. Integer corresponding to YYYYMMDDHHMISS format.
+        run_date (datetime): The current date and time when the script was executed. The time is localized to Europe/Sofia.
+        dag_name (str): The name of the Airflow dag.
+        task_name (str): The name of the Airflow task.
+        column (str): The name of the column in sys_etl_stats to be filled.
+
+    Returns:
+        None
+    """
 
     metadata = MetaData()
 
@@ -212,12 +246,14 @@ def upsert_into_stats(engine, row_count, run_id, run_date, dag_name, task_name, 
 
     with engine.connect() as conn:
 
-        select_stmt = select(stats_table).where( stats_table.c.run_id == run_id,
-                                                 stats_table.c.dag_name == dag_name,
+        # Check if a row with the current dag run_id, name and task exists
+        select_stmt = select(stats_table).where( stats_table.c.run_id    == run_id,
+                                                 stats_table.c.dag_name  == dag_name,
                                                  stats_table.c.task_name == task_name
                                                 )
         select_result = conn.execute(select_stmt).fetchone()
 
+        # If no row exists, create one. Else, update the values
         if not select_result:
             insert_stmt = ( insert(stats_table)
                            .values({ stats_table.c.run_id:    run_id,
@@ -228,7 +264,7 @@ def upsert_into_stats(engine, row_count, run_id, run_date, dag_name, task_name, 
                                    })
                           )
             insert_result = conn.execute(insert_stmt)
-            conn.commit()    
+            conn.commit()
         else:
             update_stmt = ( update(stats_table)
                            .where(stats_table.c.run_id    == run_id,

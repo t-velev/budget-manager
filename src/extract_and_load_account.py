@@ -42,10 +42,6 @@ new_data_filter = ['Name', 'Архивирай']  # A list of notion db column n
 # Extract ONLY NEW data, no filters
 account_new_data = get_data(account_db_id, last_load_date, filter_cols=new_data_filter)
 
-# For testing purposes during development
-# with open('./data/notion_account_extract.json', 'r', encoding='utf-8') as file:
-#   account_new_data = json.load(file)
-
 print(f'Extracted {len(account_new_data)} new rows from Notion.')
 
 # Write the extracted count to sys_etl_stats table
@@ -91,10 +87,6 @@ id_cols_filter = ['Name']  # A list of notion db column names to be filtered. Em
 filtered_data = get_data(account_db_id, last_load_date=None, filter_cols=id_cols_filter)
 
 print(f'Extracted {len(filtered_data)} filtered rows from Notion.')
-
-# For testing purposes during development
-# with open('./data/notion_account_extract.json', 'r', encoding='utf-8') as file:
-#   account_new_data = json.load(file)
 
 filtered_data_df = []
 

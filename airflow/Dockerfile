@@ -13,7 +13,7 @@ RUN pip install "apache-airflow==3.1.7" --no-cache-dir \
                 -r requirements.txt \
                 --constraint "https://raw.githubusercontent.com/apache/airflow/constraints-3.1.7/constraints-3.12.txt"
 
-# Create the isolated virtual environment
+# Create isolated virtual environment
 RUN python -m venv /opt/airflow/dbt_venv
 RUN /opt/airflow/dbt_venv/bin/pip install --no-cache-dir dbt-postgres   
 

@@ -32,10 +32,6 @@ data_tests:
 
 # Configuring models
 # Full documentation: https://docs.getdbt.com/docs/configuring-models
-
-# In this example config, we tell dbt to build all models in the example/
-# directory as views. These settings can be overridden in the individual model
-# files using the `{{ config(...) }}` macro.
 models:
   budget_manager:
     02_stg:
@@ -43,12 +39,13 @@ models:
     03_dwh:
       +schema: warehouse
 
+# Configuring snapshots
 snapshots:
   budget_manager:
-  # +schema: warehouse  # I have to use it in each individual snap config, because here it's overwriten by the profiles.yml file.
+  # +schema: warehouse  # Commented out. I have to use it in each individual snap config, because here it's overwriten by the profiles.yml file.
     +database: "{{ env_var('POSTGRES_DB') }}"
-    +strategy: check
-    # +updated_at: last_edited_time # Needed only for the initial load, to set scd2_valid_from = 1990-01-01.
+    +strategy: check  # no timestamp strategy because using last_edited_time is risky (can change even when copy pages in Notion)
+  # +updated_at: last_edited_time  # Needed only for the initial load, to set scd2_valid_from = 1990-01-01.
     +snapshot_meta_column_names: { 'dbt_scd_id'     : 'dk'              ,
                                    'dbt_updated_at' : 'scd2_updated_at' ,
                                    'dbt_valid_from' : 'scd2_valid_from' ,
