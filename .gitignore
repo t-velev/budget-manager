@@ -14,3 +14,8 @@ airflow/standalone_admin_password.txt
 
 # --- DBT ---
 .user.yml
+
+# --- MISC ---
+git_history.txt
+git_history_clean.txt
+budget_manager_dir_tree.txt
