@@ -50,5 +50,5 @@ The database is divided into three distinct schemas to enforce a clear separatio
     - **Facts:** `fact_transaction` (transactional type; daily grain) and `fact_budget` (periodic snapshot type; monthly grain, anchored to the end of the period to ensure correct SCD2 dimension joins).
     - **Audit/Stats:** `sys_etl_stats`, `sys_etl_dag_task_log`, and dbt snapshot audit logs.
 
-## Setup Note
-This repository contains the extraction scripts, Airflow DAGs, and dbt models required to run the pipeline. Note that the target PostgreSQL environment (schemas, user roles, and initial raw DDL definitions) was provisioned manually prior to orchestration and is assumed to be present for the pipeline to execute successfully.
+## How to Run Locally
+At the moment, the project isn't ready for others to download and run on their local machines.
