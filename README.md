@@ -19,6 +19,15 @@ Instead of taking shortcuts, I used this project as a sandbox to learn and imple
 *   **Version Control:** Git (Feature branching, documented commit history)
 *   **Support:** Google Gemini (Mainly in edge cases, when my superpowers are just not enough 🙂)
 
+## Architecture Overview
+
+![Budget Manager Architecture](./docs/budget_manager_architecture.png/)
+
+The pipeline runs on a fully containerized Docker Compose environment and follows an ELT (Extract, Load, Transform) philosophy:
+- **Extract & Load (Python):** Custom Python scripts pull data from 7 different Notion databases. The data is loaded into the raw schema in Postgres.
+- **Orchestration (Airflow):** Airflow manages the dependencies, ensuring all 7 extraction scripts succeed before handing off the process to dbt.
+- **Transform (dbt):** dbt reads the raw data, cleanses it in a staging layer, tracks historical changes using Snapshots, and builds final Fact and Dimension tables in the warehouse schema.
+
 ## Key Technical Challenges & Learnings
 
 Building this project from scratch exposed me to several real-world data engineering hurdles that required architectural pivots:
