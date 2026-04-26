@@ -21,7 +21,7 @@ Instead of taking shortcuts, I used this project as a sandbox to learn and imple
 
 ## Architecture Overview
 
-![Budget Manager Architecture](./docs/budget_manager_architecture.png/)
+![Budget Manager Architecture](./docs/budget_manager_architecture.png)
 
 The pipeline runs on a fully containerized Docker Compose environment and follows an ELT (Extract, Load, Transform) philosophy:
 - **Extract & Load (Python):** Custom Python scripts pull data from 7 different Notion databases. The data is loaded into the raw schema in Postgres.
@@ -61,3 +61,20 @@ The database is divided into three distinct schemas to enforce a clear separatio
 
 ## How to Run Locally
 At the moment, the project isn't ready for others to download and run on their local machines.
+
+## Known Limitations and Future Improvements
+
+As a learning project, I made specific architectural trade-offs that work perfectly for a single-user data volume (thousands of rows) but would need refactoring for a massive enterprise scale (millions of rows):
+
+1. **The ID Audit:**  
+   Because the Notion API does not expose a "Deleted Records" endpoint or webhooks for deletions, I implemented a "Skinny ID Audit" to catch hard deletes. While pulling a few thousand IDs works fast, this pattern would cause API rate-limit bottlenecks at an enterprise scale. One elegant alternative would be to mark the deleted records directly in Notion with a flag like "is_deleted", but the system there works a bit complicated and such a solution needs big changes there.
+
+2. **Physical Constraints vs. Logical Tests (dbt):**  
+   The jinja macros to enforce hard Primary and Foreign Keys in Postgres is a bit of a overkill. While this guarantees 100% referential integrity, it fights dbt's native "table swap" materialization logic and causes overhead. Unfortunately, I found about how exactly dbt table materialization works after I created the macros, but decided to keep them for now, until I research more thoroughly how to rely etirely on dbt's tests. 
+
+3. **No try-except:**  
+    Currently, the scripts have no try-except blocks, which is a bad practice. I have to implement such.
+
+4. **Redundant dimensions**  
+    YEAR and MONTH tables were implemented in Notion's budgeting system for a simpler analysis by year and month. In the data warehouse, these are more redundand than helpful, and I realize that.
+    Especially after I created the dim_date dimension, they are more redundant than ever. One of my next steps will be to drop them from the architecture.
