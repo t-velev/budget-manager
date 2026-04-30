@@ -94,10 +94,10 @@ select t.budget_id_bk         as budget_id_bk   ,
        ---
        t.budget_amount        as budget_amount  ,
        ---
-       coalesce(c.dk, '-1')   as category_dk    ,
-       coalesce(s.dk, '-1')   as subcategory_dk ,
-       coalesce(y.dk, '-1')   as year_dk        ,
-       coalesce(m.dk, '-1')   as month_dk
+       coalesce(c.dk, (select dk from CATEGORY    where category_id_bk    = '-1'))   as category_dk    ,  -- dbt sets dk to a hash value by default. I have to use a subquery to find the dk.
+       coalesce(s.dk, (select dk from SUBCATEGORY where subcategory_id_bk = '-1'))   as subcategory_dk ,  -- If a null or bad value for *_id_bk appears, create_drop_costraints.sql
+       coalesce(y.dk, (select dk from YEAR        where year_id_bk        = '-1'))   as year_dk        ,  -- won't be able to create the foreign key. It will fail with error like:
+       coalesce(m.dk, (select dk from MONTH       where month_id_bk       = '-1'))   as month_dk          -- 'Key (month_dk)=(-1) is not present in table "dim_month"'
        ---
        ---
 from   BUDGET t
