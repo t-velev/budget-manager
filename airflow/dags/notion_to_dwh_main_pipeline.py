@@ -16,7 +16,7 @@ engine = create_engine(f'postgresql://{db_user}:{db_pass}@budget-db:5432/{postgr
 
 default_args = {
     'retries': 1,
-    'retry_delay': pendulum.duration(seconds=10),
+    'retry_delay': pendulum.duration(seconds=30),
     'trigger_rule': 'none_failed'
 }
 
@@ -67,14 +67,23 @@ def notion_to_dwh_main_pipeline():
         force_tasks = params.get('Force tasks to run', False)
         tasks_to_run = params.get('Select tasks to run', [])
 
-        # Calc time since last successful run
-        prev_run_time = context.get('prev_start_date_success') or pendulum.datetime(1990, 1, 1)  # For situations when the dag is executed for the first time
-        current_time = pendulum.now()
-        time_since_last_run = current_time - prev_run_time
+        # Get the last successful task run date and time from warehouse.sys_etl_dag_task_log
+        with engine.begin() as conn:
+            query = text(f"select max(end_time) from {log_schema_name}.{log_table_name} where task_name = '{task_name}' and status = 'success'")
+            prev_task_success_time = conn.execute(query).fetchone()[0]  # first element of row object
+
+        if prev_task_success_time:    
+            prev_task_success_time = pendulum.instance(prev_task_success_time).set(tz='Europe/Sofia')
+        else:
+            pendulum.datetime(1990, 1, 1)  # If the dag is executed for the first time
+        
+        # Calc time since last successful run    
+        current_time = pendulum.now('Europe/Sofia')
+        time_since_last_run = current_time - prev_task_success_time
 
         # Don't run the task if last successful run was less than 15 mins ago or it isn't manually forced
         if time_since_last_run < pendulum.duration(minutes=15) and force_tasks == False:
-            print(f'Last successful run was before: {time_since_last_run.in_words()}')
+            print(f'Last successful task run was before: {time_since_last_run.in_words()}')
             print(f'Skipping {task_name}...')
             return False
 
@@ -93,7 +102,8 @@ def notion_to_dwh_main_pipeline():
         """
         Write dag and tasks runtime statistics to warehouse.sys_etl_dag_task_log table in Postgres.
 
-        Returns: None
+        Returns:
+            None
         """
 
         # Set Airflow context vars
