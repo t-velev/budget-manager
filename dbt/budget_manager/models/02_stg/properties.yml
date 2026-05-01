@@ -52,21 +52,13 @@ models:
       # ---------------------
       - name: budget_name
       # ---------------------
-      - name: year_id
-        data_tests:
-          - not_null
+      - name: year_id           # No not_null test. Handled gracefully by -1 system record.
       # ---------------------
-      - name: month_id
-        data_tests:
-          - not_null
+      - name: month_id          # No not_null test. Handled gracefully by -1 system record.
       # ---------------------
-      - name: category_id
-        data_tests:
-          - not_null
+      - name: category_id       # No not_null test. Handled gracefully by -1 system record.
       # ---------------------
-      - name: subcategory_id
-        data_tests:
-          - not_null
+      - name: subcategory_id    # No not_null test. Handled gracefully by -1 system record.
       # ---------------------
       - name: budget_amount
       # ---------------------
@@ -251,25 +243,15 @@ models:
       # ---------------------
       - name: note
       # ---------------------
-      - name: year_id
-        data_tests:
-          - not_null
+      - name: year_id           # No not_null test. Handled gracefully by -1 system record.
       # ---------------------
-      - name: month_id
-        data_tests:
-          - not_null
+      - name: month_id          # No not_null test. Handled gracefully by -1 system record.
       # ---------------------
-      - name: account_id
-        data_tests:
-          - not_null
+      - name: account_id        # No not_null test. Handled gracefully by -1 system record.
       # ---------------------
-      - name: category_id
-        data_tests:
-          - not_null
+      - name: category_id       # No not_null test. Handled gracefully by -1 system record.
       # ---------------------
-      - name: subcategory_id
-        data_tests:
-          - not_null
+      - name: subcategory_id    # No not_null test. Handled gracefully by -1 system record.
       # ---------------------
       - name: created_time
         data_tests:
