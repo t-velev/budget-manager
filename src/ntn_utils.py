@@ -209,16 +209,29 @@ def load_new_data(schema_name: str, table_name: str, new_data_df, engine) -> int
 
         if len(new_data_df) > 0:
 
+            # Transform the Notion IDs to a list
             ids_list = new_data_df['id'].tolist()
 
-            # Delete and then insert the changed existing values by key instead of updating them.
-            # Using a named parameter :id_list and passing the values in a dictionary,
-            # because a tuple with one value has a trailing comma and it breaks a standard query statement
+            # DELETE records from the raw table by using new records IDs if they are already there
             query = text(f'DELETE from {schema_name}.{table_name} where id in :id_list')
-            conn.execute(query, {'id_list': tuple(ids_list)})
 
-            # Load extracted data to the postgres budget-db
-            result = new_data_df.to_sql(name=table_name, con=conn, schema=schema_name, if_exists='append', index=False, method='multi', chunksize=1000)
+            try:
+                # Execute the DELETE using a named parameter :id_list and passing the values in a dictionary,
+                # because a tuple with one value has a trailing comma and it breaks a standard query statement.
+                conn.execute(query, {'id_list': tuple(ids_list)})
+
+            except SQLAlchemyError as e:
+                print(f'Error: Could not DELETE from {schema_name}.{table_name}. Details: {e}')
+                raise
+
+            try:
+                # INSERT the new records to the raw table
+                result = new_data_df.to_sql(name=table_name, con=conn, schema=schema_name, if_exists='append', index=False, method='multi', chunksize=1000)
+
+            except (pd.errors.DatabaseError, SQLAlchemyError) as e:
+                print(f'Error: Could not INSERT into {schema_name}.{table_name}. Details: {e}')
+                raise
+
         else:
             result = 0
 
