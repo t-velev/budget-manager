@@ -1,5 +1,6 @@
 from airflow.sdk import dag, task, Param
 from sqlalchemy import create_engine, text
+from sqlalchemy.exc import SQLAlchemyError
 import pendulum
 import os
 
@@ -68,16 +69,21 @@ def notion_to_dwh_main_pipeline():
         tasks_to_run = params.get('Select tasks to run', [])
 
         # Get the last successful task run date and time from warehouse.sys_etl_dag_task_log
-        with engine.begin() as conn:
-            query = text(f"select max(end_time) from {log_schema_name}.{log_table_name} where task_name = '{task_name}' and status = 'success'")
-            prev_task_success_time = conn.execute(query).fetchone()[0]  # first element of row object
+        try:
+            with engine.begin() as conn:
+                query = text(f"select max(end_time) from {log_schema_name}.{log_table_name} where task_name = '{task_name}' and status = 'success'")
+                prev_task_success_time = conn.execute(query).fetchone()[0]  # first element of row object
 
-        if prev_task_success_time:    
-            prev_task_success_time = pendulum.instance(prev_task_success_time).set(tz='Europe/Sofia')
-        else:
-            pendulum.datetime(1990, 1, 1)  # If the dag is executed for the first time
-        
-        # Calc time since last successful run    
+            if prev_task_success_time:
+                prev_task_success_time = pendulum.instance(prev_task_success_time).set(tz='Europe/Sofia')
+            else:
+                prev_task_success_time = pendulum.datetime(1990, 1, 1, tz='Europe/Sofia')  # If the dag is executed for the first time
+
+        except SQLAlchemyError as e:
+            print(f'Error: Could not fetch the max(end_time) for {log_schema_name}.{log_table_name} . Details: {e}')
+            raise
+
+        # Calc time since last successful run
         current_time = pendulum.now('Europe/Sofia')
         time_since_last_run = current_time - prev_task_success_time
 
@@ -130,12 +136,17 @@ def notion_to_dwh_main_pipeline():
             'error_msg'  : str(context.get('exception')) if context.get('exception') else None
         }
 
-        with engine.begin() as conn:
-            query = text(f"""
-                          INSERT into {log_schema_name}.{log_table_name}
-                          VALUES (:run_id, :run_type, :dag_name, :task_name, :start_time, :end_time, :duration, :status, :error_msg)
-                          """)
-            conn.execute(query, values)
+        try:
+            with engine.begin() as conn:
+                query = text(f"""
+                              INSERT into {log_schema_name}.{log_table_name}
+                              VALUES (:run_id, :run_type, :dag_name, :task_name, :start_time, :end_time, :duration, :status, :error_msg)
+                              """)
+                conn.execute(query, values)
+
+        # Not raising error, because task is successful. Just print info.
+        except SQLAlchemyError as e:
+            print(f'Warning: Task {values["task_name"]} succeeded, but could not write to sys_etl_dag_task_log. Details: {e}')
 
 
     ###################################################
