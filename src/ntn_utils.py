@@ -99,19 +99,58 @@ def get_data(db_id: str, last_load_date: datetime, filter_cols: list) -> list[di
         if next_cursor:
             payload['start_cursor'] = next_cursor
 
-        # Make an API post request
-        response = requests.post(url, json=payload, headers=headers, timeout=90)
+        max_retries = 3
 
-        data = response.json()
+        for attempt in range(max_retries):
+            try:
+                # Make an API post request
+                response = requests.post(url, json=payload, headers=headers, timeout=90)
 
-        all_data.extend(data['results'])
+                # Raise exception if Notion's API returns status <> success
+                response.raise_for_status()
+                
+            # Catch API HTTP errors (rate_limited, bad_gateway, unauthorized)
+            except requests.exceptions.HTTPError as e:
 
-        # Update pagination variables
-        has_more = data['has_more']
-        next_cursor = data['next_cursor']
+                # Check for 429 (Rate Limit) or 504 (Timeout) error
+                if response.status_code in [429, 504]:
+                    if attempt < max_retries - 1:
+                        print(f'Notion is busy (Status {response.status_code}). Waiting 20 seconds...')
+                        time.sleep(20)
+                        continue  # Try again
+                    else:
+                        print(f'Max retries reached. Failing script due to API timeout.')
+                        raise e
+                else:
+                    print(f'Fatal API Error: {response.status_code}. Stopping script.')
+                    raise e               
 
-        # Pause to not overload the API (Rate limit = 3 req/sec)
-        time.sleep(0.5)
+            # Catch basic connection errors (no internet, DNS failure)
+            except requests.exceptions.RequestException as e:
+
+                if attempt < max_retries - 1:
+                    print(f'Network error: {e}. Waiting 20 seconds...')
+                    time.sleep(20)
+                    continue 
+                else:
+                    print(f'Max retries reached for Network Error. Failing script.')
+                    raise e       # Crash the script
+
+            else:
+                # If try block succeed:
+                # Format response into json and add to list
+                data = response.json()
+                all_data.extend(data['results'])
+
+                # Update pagination variables
+                has_more = data['has_more']
+                next_cursor = data['next_cursor']
+
+                # Pause to not overload the API (Rate limit = 3 req/sec)
+                time.sleep(0.5)
+                
+                # Break out of the retry loop when succeed
+                break        
 
     return all_data
 
