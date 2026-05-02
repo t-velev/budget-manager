@@ -35,9 +35,8 @@ engine = create_engine(f'postgresql://{db_user}:{db_pass}@budget-db:5432/{postgr
 # Get the last load date from the database
 last_load_date = get_last_load_date(pg_schema, pg_table_name, engine)
 
-print('Last load date = ', last_load_date)
-
-new_data_filter = ['Име']  # A list of notion db column names to be filtered. Empty list filters nothing.
+# A list of notion db columns to be filtered. Empty list filters nothing.
+new_data_filter = ['Име']
 
 # Extract ONLY NEW data, no filters
 year_new_data = get_data(year_db_id, last_load_date, filter_cols=new_data_filter)
