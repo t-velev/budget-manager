@@ -72,9 +72,6 @@ As a learning project, I made specific architectural trade-offs that work perfec
 2. **Physical Constraints vs. Logical Tests (dbt):**  
    The jinja macros to enforce hard Primary and Foreign Keys in Postgres is a bit of a overkill. While this guarantees 100% referential integrity, it fights dbt's native "table swap" materialization logic and causes overhead. Unfortunately, I found about how exactly dbt table materialization works after I created the macros, but decided to keep them for now, until I research more thoroughly how to rely etirely on dbt's tests. 
 
-3. **No try-except:**  
-    Currently, the scripts have no try-except blocks, which is a bad practice. I have to implement such.
-
-4. **Redundant dimensions**  
+3. **Redundant dimensions**  
     YEAR and MONTH tables were implemented in Notion's budgeting system for a simpler analysis by year and month. In the data warehouse, these are more redundand than helpful, and I realize that.
     Especially after I created the dim_date dimension, they are more redundant than ever. One of my next steps will be to drop them from the architecture.
