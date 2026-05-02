@@ -4,6 +4,7 @@ import os
 import time
 import pandas as pd
 from sqlalchemy import Table, Column, Integer, String, Date, MetaData, select, insert, update, text
+from sqlalchemy.exc import SQLAlchemyError
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
@@ -170,9 +171,22 @@ def get_last_load_date(schema_name: str, table_name: str, engine) -> datetime:
 
     # Get the last load date from the database
     query = f'select max(load_date) from {schema_name}.{table_name}'
-    df = pd.read_sql_query(query, engine)
+
+    try:
+
+        df = pd.read_sql_query(query, engine)
+
+    except (pd.errors.DatabaseError, SQLAlchemyError) as e:
+
+        print(f'Error: Could not query {schema_name}.{table_name}. Details: {e}')
+        raise
 
     last_load_date = df.iloc[0].item()
+
+    if last_load_date is None:
+        print(f'No previous loads found in {table_name}.{schema_name}. Preparing for full load.')
+    else:
+        print(f'Last load date = {last_load_date}. Preparing for incremental load.')
 
     return last_load_date
 
