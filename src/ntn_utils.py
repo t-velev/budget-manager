@@ -109,7 +109,7 @@ def get_data(db_id: str, last_load_date: datetime, filter_cols: list) -> list[di
 
                 # Raise exception if Notion's API returns status <> success
                 response.raise_for_status()
-                
+
             # Catch API HTTP errors (rate_limited, bad_gateway, unauthorized)
             except requests.exceptions.HTTPError as e:
 
@@ -124,7 +124,7 @@ def get_data(db_id: str, last_load_date: datetime, filter_cols: list) -> list[di
                         raise e
                 else:
                     print(f'Fatal API Error: {response.status_code}. Stopping script.')
-                    raise e               
+                    raise e
 
             # Catch basic connection errors (no internet, DNS failure)
             except requests.exceptions.RequestException as e:
@@ -132,7 +132,7 @@ def get_data(db_id: str, last_load_date: datetime, filter_cols: list) -> list[di
                 if attempt < max_retries - 1:
                     print(f'Network error: {e}. Waiting 20 seconds...')
                     time.sleep(20)
-                    continue 
+                    continue
                 else:
                     print(f'Max retries reached for Network Error. Failing script.')
                     raise e       # Crash the script
@@ -149,9 +149,9 @@ def get_data(db_id: str, last_load_date: datetime, filter_cols: list) -> list[di
 
                 # Pause to not overload the API (Rate limit = 3 req/sec)
                 time.sleep(0.5)
-                
+
                 # Break out of the retry loop when succeed
-                break        
+                break
 
     return all_data
 
@@ -259,16 +259,33 @@ def del_missing_data(schema_name: str, table_name: str, filtered_df, engine) -> 
 
     with engine.begin() as conn:
 
-        # Delete the old data from previous runs
+        # DELETE the ID records from previous runs so we can insert the most current ones
         query = text(f"DELETE from {schema_name}.notion_ids_audit where source_name = '{table_name}'")
-        conn.execute(query)
 
-        # Load the most current ids
-        filtered_df.to_sql(name='notion_ids_audit', con=conn, schema=schema_name, if_exists='append', index=False, method='multi', chunksize=1000)
+        try:
+            conn.execute(query)
 
-        # Use the ids in NOTION_IDS_AUDIT to find and delete the missing rows
+        except SQLAlchemyError as e:
+            print(f'Error: Could not DELETE the prev IDs for {table_name} from {schema_name}.notion_ids_audit. Details: {e}')
+            raise
+
+        try:
+            # INSERT the most current IDs into notion_ids_audit table
+            filtered_df.to_sql(name='notion_ids_audit', con=conn, schema=schema_name, if_exists='append', index=False, method='multi', chunksize=1000)
+
+        except (pd.errors.DatabaseError, SQLAlchemyError) as e:
+            print(f'Error: Could not INSERT the most current IDs of {table_name} into {schema_name}.notion_ids_audit. Details: {e}')
+            raise
+
+        # Use the IDs in NOTION_IDS_AUDIT to find and DELETE the missing rows
         query = text(f"DELETE from {schema_name}.{table_name} t where not exists (select 1 from {schema_name}.notion_ids_audit tt where tt.id = t.id and tt.source_name = '{table_name}')")
-        result = conn.execute(query)
+
+        try:
+            result = conn.execute(query)
+
+        except SQLAlchemyError as e:
+            print(f'Error: Could not DELETE the missing Notion rows from {schema_name}.{table_name}. Details: {e}')
+            raise
 
         return result.rowcount # Return how many rows were actually deleted
 
@@ -317,7 +334,11 @@ def upsert_into_stats(engine, row_count: int, run_id: int, run_date: datetime, d
                                                  stats_table.c.dag_name  == dag_name,
                                                  stats_table.c.task_name == task_name
                                                 )
-        select_result = conn.execute(select_stmt).fetchone()
+        try:
+            select_result = conn.execute(select_stmt).fetchone()
+        except SQLAlchemyError as e:
+            print(f'Error: Could not execute the SELECT statement. Details: {e}')
+            raise
 
         # If no row exists, create one. Else, update the values
         if not select_result:
@@ -329,8 +350,13 @@ def upsert_into_stats(engine, row_count: int, run_id: int, run_date: datetime, d
                                      stats_table.c[column]:   row_count
                                    })
                           )
-            insert_result = conn.execute(insert_stmt)
-            conn.commit()
+            try:
+                insert_result = conn.execute(insert_stmt)
+            except SQLAlchemyError as e:
+                print(f'Error: Could not INSERT a new run_id row in sys_etl_stats. Details: {e}')
+                raise
+            else:
+                conn.commit()
         else:
             update_stmt = ( update(stats_table)
                            .where(stats_table.c.run_id    == run_id,
@@ -339,5 +365,10 @@ def upsert_into_stats(engine, row_count: int, run_id: int, run_date: datetime, d
                                   stats_table.c.task_name == task_name)
                            .values({ stats_table.c[column]: row_count })
                           )
-            update_result = conn.execute(update_stmt)
-            conn.commit()
+            try:
+                update_result = conn.execute(update_stmt)
+            except SQLAlchemyError as e:
+                print(f'Error: Could not UPDATE sys_etl_stats. Details: {e}')
+                raise
+            else:
+                conn.commit()
